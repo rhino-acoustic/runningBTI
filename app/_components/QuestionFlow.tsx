@@ -667,6 +667,49 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                             </div>
                         </div>
                     </div>
+
+                    {/* 하단 배너 */}
+                    <div className="h-[100px] bg-white mb-2 max-w-md mx-auto overflow-hidden">
+                        {testData?.banners?.question?.[currentStep % (testData.banners.question?.length || 1)] && (
+                            <a
+                                href={testData.banners.question[currentStep % (testData.banners.question.length || 1)].landing_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block h-full w-full"
+                            >
+                                <Image
+                                    src={testData.banners.question[currentStep % (testData.banners.question.length || 1)].image_url}
+                                    alt="Advertisement"
+                                    width={448}
+                                    height={100}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    priority
+                                />
+                            </a>
+                        )}
+                    </div>
+
+                    {/* 로고 */}
+                    <div className="flex justify-center mb-4">
+                        <a
+                            href="https://vegavery.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                        >
+                            <Image
+                                src="/logo/bk.png"
+                                alt="Vegavery Logo"
+                                width={100}
+                                height={30}
+                                style={{
+                                    width: '100px',
+                                    height: 'auto',
+                                    objectFit: 'contain'
+                                }}
+                            />
+                        </a>
+                    </div>
                 </div>
             </div>
         );
