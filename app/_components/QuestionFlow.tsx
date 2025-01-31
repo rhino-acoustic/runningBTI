@@ -139,6 +139,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     const [nameError, setNameError] = useState('');
     const [mbtiResult, setMBTIResult] = useState<MBTIResult | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
     // localStorage 초기화를 useEffect로 이동
     useEffect(() => {
@@ -366,13 +367,14 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
             timestamp: Date.now(),
             questionId: currentStep
         };
-        
+
         const updatedAnswers = [...answers, newAnswer];
         setAnswers(updatedAnswers);
 
         // 다음 단계로 이동
         if (currentStep < testData.content.questions.length - 1) {
             setCurrentStep(prev => prev + 1);
+            setSelectedAnswer(null);  // 선택 상태 초기화
         } else {
             calculateResult();
         }
@@ -651,8 +653,11 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                                         key={idx}
                                         className={`
                                             w-full py-2 px-3  
-                                            bg-white text-[#8D6E63] 
-                                            text-center font-[700] 
+                                            ${selectedAnswer === idx 
+                                                ? 'bg-[#004D40] text-white font-[900]' 
+                                                : 'bg-white text-[#8D6E63] font-[700]'
+                                            }
+                                            text-center
                                             transition-all duration-300
                                             hover:bg-[#004D40] hover:text-white hover:font-[900]
                                             ${idx === 3 ? 'mb-4' : ''}
@@ -716,7 +721,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     }
 
     // 결과 화면
-    if (pageState === 'result' && mbtiResult) {
+    if (pageState === 'result' && mbtiResult && testData) {
         return (
             <ResultPage
                 testTitle={testData.meta.title}
