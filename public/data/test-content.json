@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "type": "ENFP",
+      "title": "치어러너",
+      "description": "'우리 함께 뛰어요!' 러닝팀의 에너지 뱅크입니다. 힘들어하는 러너에게 농담을 던지고, 포기하려는 러너에게 감동적인 스토리텔링을 들려주는 당신! 지난 주 마라톤에서는 완주를 포기하려던 3명의 러너를 끝까지 이끌었고, 이번 주는 초보자를 위한 '즐거운 러닝' 클래스를 열었죠. 당신의 밝은 에너지는 러닝팀의 원동력입니다.",
+      "categories": [
+        {
+          "title": "주요 특성",
+          "items": ["창의성", "열정", "통찰력", "적응력"]
+        },
+        {
+          "title": "성장 포인트",
+          "items": ["집중력 향상", "현실감 키우기"]
+        },
+        {
+          "title": "추천 직업",
+          "items": ["광고기획자", "배우", "강연가"]
+        }
+      ],
+      "image": "https://upload.wikimedia.org/wikipedia/en/c/c7/Chill_guy_original_artwork.jpg"
+    }
+  ],
+  "questions": [
+    {
+      "id": "1",
+      "text": "질문 텍스트...",
+      "answers": [
+        { "text": "답변1", "type": "E" },
+        { "text": "답변2", "type": "I" }
+      ],
+      "image": "이미지URL"
+    }
+  ]
+} 

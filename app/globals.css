@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Freesentation 폰트 설정 */
+@font-face {
+    font-family: 'Freesentation';
+    src: url('/fonts/Freesentation-4Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Freesentation';
+    src: url('/fonts/Freesentation-5Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Freesentation';
+    src: url('/fonts/Freesentation-6SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Freesentation';
+    src: url('/fonts/Freesentation-7Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* 기본 스타일 */
+body {
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Freesentation', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+/* 컴포넌트 스타일 */
+@layer components {
+    .content-area {
+        @apply bg-white min-h-screen shadow-xl;
+    }
+
+    .ad-banner {
+        @apply w-full h-[120px] mb-4 bg-gray-100 overflow-hidden;
+    }
+
+    .loading-overlay {
+        @apply fixed inset-0 bg-white/80 flex items-center justify-center z-50;
+    }
+
+    .answer-button {
+        @apply w-full py-5 px-6 bg-white text-[#8D6E63] text-left 
+               hover:bg-[#CCE7E3] hover:text-[#004D40] 
+               transition-colors duration-200 shadow-sm;
+    }
+
+    .answer-buttons {
+        @apply flex flex-col w-full max-w-md gap-3;
+    }
+
+    .question-page {
+        @apply flex flex-col items-center min-h-screen px-4 pt-16;
+    }
+
+    .progress-gauge {
+        @apply relative w-full h-2 bg-gray-200 overflow-hidden mx-auto max-w-[720px];
+    }
+
+    .gauge-bar {
+        @apply absolute left-0 top-0 h-full transition-all duration-300;
+    }
+
+    .result-section {
+        @apply p-6 bg-white shadow-lg mt-8;
+    }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 720px) {
+    .question-page h3 {
+        @apply text-lg;
+    }
+
+    .answer-button {
+        @apply py-3 px-4;
+    }
+}
+
+:root {
+    --background: #ffffff;
+    --foreground: #000000;
+}

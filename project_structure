@@ -1,0 +1,12 @@
+📂src
+├─📁components
+│ ├─AdBanner.js      # 광고 배너 컴포넌트
+│ ├─TestLayout.js    # 공통 레이아웃
+│ ├─QuestionFlow.js  # 질문 흐름 관리
+│ └─ResultDisplay.js # 결과 표시
+📂public
+├─📁data
+│ └─test-content.csv # CSV 데이터 예시
+└─📁images
+  ├─banner-ad.png    # 720x120 광고 이미지
+  └─logo-footer.png  # 하단 로고 
