@@ -176,11 +176,12 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
     // 이미지 프리로딩을 위한 함수
     const preloadImages = (questions: Array<{ image_url: string | null }>) => {
+        if (typeof window === 'undefined') return;  // 서버 사이드에서는 실행하지 않음
+        
         questions.forEach(question => {
             if (question.image_url) {
-                preload(question.image_url, {
-                    sizes: "(max-width: 768px) 100vw, 302px"
-                });
+                const img = new window.Image();
+                img.src = question.image_url;
             }
         });
     };
@@ -409,9 +410,9 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
         if (isLoading) {
             return (
-                <div className="animate-pulse">
-                    <div className="h-4 w-16 bg-gray-200 rounded"></div>
-                </div>
+                <span className="inline-block">
+                    <span className="animate-pulse inline-block w-16 h-4 bg-gray-200 rounded"></span>
+                </span>
             );
         }
 
@@ -421,10 +422,18 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     // 로딩 화면
     if (loadState === 'loading') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[500px] max-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                <div className="flex flex-col items-center gap-4 p-4">
-                    <Spinner />
-                    <p className="text-[#8D6E63]">로딩 중...</p>
+            <div className="w-full overflow-x-hidden">
+                <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
+                    <div className="flex-1 flex flex-col items-center justify-center p-4">
+                        <div className="w-full max-w-md">
+                            <div className="h-[170px] mx-auto flex justify-center items-center">
+                                <div className="flex flex-col items-center gap-4">
+                                    <Spinner />
+                                    <p className="text-[#8D6E63]">로딩 중...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -528,7 +537,6 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
                         {/* 참여자 수 */}
                         <p className="text-sm font-[400] text-[#8D6E63] mb-1">
-                            현재{' '}
                             <ParticipantCount count={stats.participants} />
                         </p>
 
