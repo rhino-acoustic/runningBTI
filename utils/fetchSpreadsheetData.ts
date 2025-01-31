@@ -2,15 +2,13 @@
 
 import { google } from 'googleapis';
 import type { TestData } from '@/types/testTypes';
-import { Cache } from 'cache-manager';
+import { sheetCache } from '@/utils/cache';  // 자체 Cache 클래스 import
 
 interface SheetResponse {
     range: string;
     majorDimension: string;
     values: string[][];
 }
-
-export const sheetCache = new Cache(5 * 60 * 1000); // 5분
 
 export async function fetchSpreadsheetData() {
     try {
