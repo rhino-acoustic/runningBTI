@@ -185,21 +185,21 @@ export function ResultPage({
                         </div>
 
                         {/* 하단 배너 */}
-                        <div className="h-[100px] bg-white mb-4 w-full overflow-hidden">
+                        <div className="h-[100px] bg-white mb-2 max-w-md mx-auto">
                             {bottomImage && (
                                 <a
                                     href={bottomImage.landing_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block relative h-[100px] w-full"  // relative 추가, 높이 고정
+                                    className="block h-full"
                                 >
                                     <Image
                                         src={bottomImage.image_url}
                                         alt="Advertisement"
-                                        fill  // width, height 대신 fill 사용
-                                        className="object-contain"  // cover 대신 contain 사용
-                                        sizes="(max-width: 768px) 100vw, 448px"
-                                        priority  // 빠른 로딩을 위해 priority 추가
+                                        width={448}
+                                        height={100}
+                                        className="w-full h-full object-contain"  // cover 대신 contain 사용
+                                        priority
                                     />
                                 </a>
                             )}

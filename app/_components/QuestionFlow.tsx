@@ -716,7 +716,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     }
 
     // 결과 화면
-    if (pageState === 'result' && result && mbtiResult && testData) {
+    if (pageState === 'result' && mbtiResult) {
         return (
             <ResultPage
                 testTitle={testData.meta.title}
