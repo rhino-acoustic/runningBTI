@@ -138,35 +138,8 @@ export default async function Home() {
             testTitle={data.meta.title}
             questions={data.content.questions}
             results={data.content.results}
+            banners={data.banners}
           />
-          {/* 시작 페이지 배너 수정 */}
-          {data.banners.start.length > 0 && (
-            <div className="w-full h-[100px] bg-white">
-                <div className="relative w-full h-full">
-                    <Image
-                        src={data.banners.start[0].image_url}
-                        alt="Advertisement"
-                        fill
-                        className="object-contain"
-                        unoptimized
-                        priority
-                    />
-                </div>
-            </div>
-          )}
-          {/* 로고 */}
-          <div className="flex justify-center">
-            <div className="relative w-[100px] h-[30px]">
-                <Image
-                    src="/logo/bk.png"
-                    alt="Vegavery Logo"
-                    fill
-                    className="object-contain"
-                    unoptimized
-                    priority
-                />
-            </div>
-          </div>
         </main>
       </ErrorBoundary>
     );

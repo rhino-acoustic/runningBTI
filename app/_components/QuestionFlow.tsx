@@ -574,26 +574,24 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                     </div>
 
                     {/* 하단 배너 */}
-                    <div className="h-[100px] bg-white mb-2 max-w-md mx-auto overflow-hidden">
-                        {testData?.banners?.start?.[0] && (
-                            <a
-                                href={testData.banners.start[0].landing_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block h-full w-full"
-                            >
-                                <Image
-                                    src={testData.banners.start[0].image_url}
-                                    alt="Advertisement"
-                                    width={448}
-                                    height={100}
-                                    style={{ width: '100%', height: 'auto' }}
-                                    className="object-cover"
-                                    priority
-                                />
-                            </a>
-                        )}
-                    </div>
+                    {testData?.banners?.start?.[0] && (
+                        <div className="w-full max-w-md mx-auto">
+                            <div className="w-full h-[100px] bg-white mb-4">
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                    <div className="relative w-full h-full">
+                                        <Image
+                                            src={testData.banners.start[0].image_url}
+                                            alt="Advertisement"
+                                            fill
+                                            className="object-contain"
+                                            unoptimized
+                                            priority
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 로고 */}
                     <div className="flex justify-center mb-4">
@@ -624,6 +622,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     // 질문 화면
     if (pageState === 'question' && testData) {
         const question = testData.content.questions[currentStep];
+        const currentBanner = testData.banners.question[currentStep % (testData.banners.question?.length || 1)];
         return (
             <div className="w-full overflow-x-hidden">
                 <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
@@ -708,34 +707,46 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                         </div>
                     </div>
 
-                    {/* 하단 배너 */}
-                    {testData?.banners?.question?.[currentStep % (testData.banners.question?.length || 1)] && (
-                        <div className="w-full h-[100px] bg-white">
-                            <div className="relative w-full h-full">
-                                <Image
-                                    src={testData.banners.question[currentStep % (testData.banners.question.length || 1)].image_url}
-                                    alt="Advertisement"
-                                    fill
-                                    className="object-contain"
-                                    unoptimized
-                                    priority
-                                />
+                    {/* 질문 페이지 배너 */}
+                    {currentBanner && (
+                        <div className="w-full max-w-md mx-auto">
+                            <div className="w-full h-[100px] bg-white mb-4">
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                    <div className="relative w-full h-full">
+                                        <Image
+                                            src={currentBanner.image_url}
+                                            alt="Advertisement"
+                                            fill
+                                            className="object-contain"
+                                            unoptimized
+                                            priority
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    {/* 로고 */}
-                    <div className="flex justify-center">
-                        <div className="relative w-[100px] h-[30px]">
+                    {/* 로고 원래대로 복구 */}
+                    <div className="flex justify-center mb-4">
+                        <a
+                            href="https://vegavery.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                        >
                             <Image
                                 src="/logo/bk.png"
                                 alt="Vegavery Logo"
-                                fill
-                                className="object-contain"
-                                unoptimized
-                                priority
+                                width={100}
+                                height={30}
+                                style={{
+                                    width: '100px',
+                                    height: 'auto',
+                                    objectFit: 'contain'
+                                }}
                             />
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>
