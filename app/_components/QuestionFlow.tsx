@@ -271,12 +271,35 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     }, []);
 
     // 참여 기록
-    const recordParticipation = () => {
-        const newParticipants = stats.participants + 1;
-        setStats((prev) => ({
-            ...prev,
-            participants: newParticipants,
-        }));
+    const recordParticipation = async () => {
+        try {
+            const response = await fetch('/api/stats', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update stats');
+            }
+
+            const data = await response.json();
+            setStats((prev) => ({
+                ...prev,
+                participants: data.participants
+            }));
+            localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(data.participants));
+        } catch (error) {
+            console.error('Error recording participation:', error);
+            // 로컬에서라도 카운트는 증가
+            const newParticipants = stats.participants + 1;
+            setStats((prev) => ({
+                ...prev,
+                participants: newParticipants
+            }));
+            localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(newParticipants));
+        }
     };
 
     // 테스트 시작
