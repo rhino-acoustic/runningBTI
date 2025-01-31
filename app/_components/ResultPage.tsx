@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import domtoimage from 'dom-to-image-more';
 import { CountUpNumber } from './CountUpNumber';
 import Image from 'next/image';
 import { SaveIcon, ShareIcon, RestartIcon } from '../../components/Icons';
@@ -8,27 +7,7 @@ import { ResultCard } from './ResultCard';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 
-// 상단에 타입 선언 추가
-declare module 'dom-to-image-more' {
-    export interface DomToImageOptions {
-        quality?: number;
-        bgcolor?: string;
-        cacheBust?: boolean;
-        style?: {
-            transform?: string;
-            transformOrigin?: string;
-        };
-        fontEmbedCSS?: string;
-        filter?: (node: Element) => boolean;
-    }
-
-    export function toPng(node: HTMLElement, options?: DomToImageOptions): Promise<string>;
-    export function toJpeg(node: HTMLElement, options?: DomToImageOptions): Promise<string>;
-    export function toBlob(node: HTMLElement, options?: DomToImageOptions): Promise<Blob>;
-    export function toPixelData(node: HTMLElement, options?: DomToImageOptions): Promise<Uint8ClampedArray>;
-}
-
-// 이미지 관련 인터페이스 제거
+// 불필요한 타입 선언과 컴포넌트 제거
 interface ResultProps {
     testTitle: string;
     result: {
@@ -51,51 +30,6 @@ interface ResultProps {
     onRestart: () => void;
     userName?: string;
 }
-
-// 이미지 캡처용 컴포넌트
-const CaptureImage = ({ src, alt, style }: { src: string; alt: string; style: React.CSSProperties }) => {
-    return (
-        <img
-            src={src}
-            alt={alt}
-            style={style}
-            crossOrigin="anonymous"
-        />
-    );
-};
-
-// 일반 표시용 컴포넌트
-const DisplayImage = ({ src, alt, width, height, className }: { 
-    src: string; 
-    alt: string; 
-    width: number;
-    height: number;
-    className?: string;
-}) => {
-    return (
-        <Image
-            src={src}
-            alt={alt}
-            width={width}
-            height={height}
-            className={className}
-            priority
-            unoptimized
-        />
-    );
-};
-
-// 이미지를 base64로 변환하는 함수 추가
-const getBase64Image = async (url: string): Promise<string> => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-};
 
 export function ResultPage({
     testTitle,
