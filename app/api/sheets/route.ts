@@ -110,7 +110,7 @@ export async function GET() {
         // Google Auth 클라이언트 생성
         const client = new JWT({
             email: process.env.GOOGLE_CLIENT_EMAIL,
-            key: process.env.GOOGLE_PRIVATE_KEY?.split(String.raw`\n`).join('\n'),
+            key: process.env.GOOGLE_PRIVATE_KEY,
             scopes: ['https://www.googleapis.com/auth/spreadsheets']
         });
 
