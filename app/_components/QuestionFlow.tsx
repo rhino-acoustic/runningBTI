@@ -173,13 +173,22 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
     }, [stats.participants]);
 
+    // 이미지 프리로딩을 위한 함수
+    const preloadImages = (questions: Array<{ image_url: string | null }>) => {
+        questions.forEach(question => {
+            if (question.image_url) {
+                const img = new Image();
+                img.src = question.image_url;
+            }
+        });
+    };
+
     // 데이터 로드
     useEffect(() => {
         const loadData = async () => {
             try {
                 setLoadState('loading');
                 
-                // 병렬로 데이터 로딩
                 const [testResponse, statsResponse] = await Promise.all([
                     fetch('/api/sheets'),
                     fetch('/api/stats')
@@ -196,6 +205,11 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                 
                 if (!testData?.content) {
                     throw new Error('Invalid data structure');
+                }
+
+                // 이미지 프리로딩 추가
+                if (testData.content.questions) {
+                    preloadImages(testData.content.questions);
                 }
 
                 setTestData(testData);
