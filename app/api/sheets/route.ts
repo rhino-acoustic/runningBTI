@@ -58,6 +58,21 @@ export async function GET() {
     const CACHE_KEY = 'sheet_data';
     
     try {
+        // 캐시 확인
+        const cachedData = sheetCache.get(CACHE_KEY);
+        if (cachedData) {
+            return NextResponse.json(cachedData);
+        }
+
+        // 환경변수 유효성 검사
+        if (!process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.SHEET_ID) {
+            console.error('Missing required environment variables');
+            return NextResponse.json(
+                { error: 'Server configuration error' },
+                { status: 500 }
+            );
+        }
+
         // 환경 변수 체크
         console.log('=== 환경변수 체크 ===');
         console.log({
@@ -93,12 +108,6 @@ export async function GET() {
             }), {})
         });
 
-        // 캐시 확인
-        const cachedData = sheetCache.get(CACHE_KEY);
-        if (cachedData) {
-            return NextResponse.json(cachedData);
-        }
-
         // Google Auth 클라이언트 생성
         const auth = new google.auth.GoogleAuth({
             credentials,
@@ -119,9 +128,12 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in /api/sheets:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch data' },
+            { 
+                error: 'Failed to fetch data',
+                details: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         );
     }
