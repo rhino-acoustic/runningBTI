@@ -45,6 +45,13 @@ export function ResultPage({
         if (!element) return;
 
         try {
+            // 성공시 효과 먼저 실행
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
             const canvas = await html2canvas(element, {
                 backgroundColor: '#FFFFFF',
                 scale: 2,
@@ -60,25 +67,26 @@ export function ResultPage({
                 }
             });
 
-            // 캔버스를 Blob으로 변환
-            canvas.toBlob((blob) => {
-                if (!blob) return;
-                
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = `${result.type}_result.png`;
-                link.href = url;
-                link.click();
-                
-                // 성공시 효과
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
+            // 모바일 환경 체크
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-                URL.revokeObjectURL(url);
-            }, 'image/png', 1.0);
+            if (isMobile) {
+                // 모바일에서는 새 탭에서 이미지 열기
+                const dataUrl = canvas.toDataURL('image/png');
+                window.open(dataUrl, '_blank');
+            } else {
+                // PC에서는 다운로드
+                canvas.toBlob((blob) => {
+                    if (!blob) return;
+                    
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `${result.type}_result.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }, 'image/png', 1.0);
+            }
 
         } catch (error) {
             console.error('이미지 저장 실패:', error);
