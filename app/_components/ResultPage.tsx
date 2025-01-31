@@ -165,8 +165,8 @@ export function ResultPage({
     return (
         <div className="w-full overflow-x-hidden">
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                {/* 결과 영역 */}
-                <div id="capture-area" className="w-full bg-white max-w-[448px] mx-auto p-4">
+                {/* 화면에 보이는 영역 */}
+                <div className="w-full bg-white max-w-[448px] mx-auto p-4">
                     <div className="w-full">
                         {/* 제목 */}
                         <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
@@ -204,6 +204,39 @@ export function ResultPage({
                             </div>
                         </div>
 
+                        {/* 하단 배너 */}
+                        {bottomImage && (
+                            <div className="w-full h-[100px] bg-white">
+                                <Image
+                                    src={bottomImage.image_url}
+                                    alt="Advertisement"
+                                    width={448}
+                                    height={100}
+                                    className="w-full h-full object-contain"
+                                    unoptimized
+                                    priority
+                                />
+                            </div>
+                        )}
+
+                        {/* 로고 */}
+                        <div className="flex justify-center">
+                            <Image
+                                src="/logo/bk.png"
+                                alt="Vegavery Logo"
+                                width={100}
+                                height={30}
+                                className="w-[100px] h-auto"
+                                unoptimized
+                                priority
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 캡처를 위한 숨겨진 영역 */}
+                <div id="capture-area" className="hidden">
+                    <div className="w-[448px] bg-white p-4">
                         {/* 하단 배너 */}
                         {bottomImage && (
                             <div className="w-full h-[100px] bg-white">
