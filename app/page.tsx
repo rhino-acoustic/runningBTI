@@ -141,16 +141,15 @@ export default async function Home() {
           />
           {/* 시작 페이지 배너 수정 */}
           {data.banners.start.length > 0 && (
-            <div className="w-full max-w-[448px] h-[100px] mx-auto bg-white">
+            <div className="w-full h-[100px] bg-white">
                 <div className="relative w-full h-full">
                     <Image
                         src={data.banners.start[0].image_url}
                         alt="Advertisement"
                         fill
                         className="object-contain"
-                        sizes="(max-width: 448px) 100vw, 448px"
-                        priority
                         unoptimized
+                        priority
                     />
                 </div>
             </div>

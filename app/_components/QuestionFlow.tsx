@@ -709,21 +709,20 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                     </div>
 
                     {/* 하단 배너 */}
-                    <div className="w-full max-w-[448px] h-[100px] mx-auto bg-white">
-                        {testData?.banners?.question?.[currentStep % (testData.banners.question?.length || 1)] && (
+                    {testData?.banners?.question?.[currentStep % (testData.banners.question?.length || 1)] && (
+                        <div className="w-full h-[100px] bg-white">
                             <div className="relative w-full h-full">
                                 <Image
                                     src={testData.banners.question[currentStep % (testData.banners.question.length || 1)].image_url}
                                     alt="Advertisement"
                                     fill
                                     className="object-contain"
-                                    sizes="(max-width: 448px) 100vw, 448px"
-                                    priority
                                     unoptimized
+                                    priority
                                 />
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* 로고 */}
                     <div className="flex justify-center mb-4">
