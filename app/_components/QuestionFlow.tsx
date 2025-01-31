@@ -174,14 +174,18 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     }, [stats.participants]);
 
     // 이미지 프리로딩을 위한 함수
-    const preloadImages = (questions: Array<{ image_url: string | null }>) => {
-        if (typeof window === 'undefined') return;  // 서버 사이드에서는 실행하지 않음
-        
-        questions.forEach(question => {
-            if (question.image_url) {
-                const img = new window.Image();  // 브라우저의 Image 생성자 사용
-                img.src = question.image_url;
-            }
+    const preloadImages = (questions: Array<{ image_url: string | null }>, currentIndex: number = 0) => {
+        if (typeof window === 'undefined') return;
+
+        // 현재 질문과 다음 질문의 이미지를 프리로드
+        const imagesToPreload = [
+            questions[currentIndex]?.image_url,
+            questions[currentIndex + 1]?.image_url
+        ].filter((url): url is string => !!url);
+
+        imagesToPreload.forEach(url => {
+            const img = new window.Image();
+            img.src = url;
         });
     };
 
@@ -209,9 +213,9 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                     throw new Error('Invalid data structure');
                 }
 
-                // 이미지 프리로딩 추가
+                // 첫 번째 이미지 프리로드
                 if (testData.content.questions) {
-                    preloadImages(testData.content.questions);
+                    preloadImages(testData.content.questions, 0);
                 }
 
                 setTestData(testData);
@@ -230,6 +234,13 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
         loadData();
     }, []);
+
+    // 질문이 바뀔 때마다 다음 이미지 프리로드
+    useEffect(() => {
+        if (testData?.content?.questions) {
+            preloadImages(testData.content.questions, currentStep);
+        }
+    }, [currentStep, testData]);
 
     // 결과 계산 함수
     const calculateResult = () => {
@@ -587,113 +598,69 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     if (pageState === 'question' && testData) {
         const question = testData.content.questions[currentStep];
         return (
-            <div className="w-full overflow-x-hidden animate-fade-in">
-                <div className="flex flex-col h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                    {/* 게이지 영역 */}
-                    <div className="sticky top-0 w-full bg-[#F1E9DB] pt-4 pb-1">
-                        <div className="max-w-md mx-auto">
-                            <ProgressGauge
-                                current={currentStep + 1}
-                                total={testData.content.questions.length}
-                            />
-                        </div>
+            <div className="w-full overflow-x-hidden">
+                <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
+                    {/* 게이지바 컨테이너에 패딩 추가 */}
+                    <div className="px-4 w-full max-w-md mx-auto">
+                        <ProgressGauge 
+                            current={currentStep + 1} 
+                            total={testData.content.questions.length} 
+                        />
                     </div>
 
-                    {/* 질문 영역 */}
-                    <div className="flex-1 flex flex-col items-center px-4 pt-1">
-                        {/* Q넘버와 질문 텍스트 */}
-                        <div className="text-center w-full max-w-md">
-                            <div className="text-[#004D40] font-[900] text-2xl mb-2">
-                                Q{currentStep + 1}
+                    <div className="flex-1 flex flex-col items-center p-4">
+                        {/* 질문 영역 */}
+                        <div className="w-full max-w-md">
+                            {/* Q넘버와 질문 텍스트 */}
+                            <div className="text-center w-full max-w-md">
+                                <div className="text-[#004D40] font-[900] text-2xl mb-2">
+                                    Q{currentStep + 1}
+                                </div>
+                                <h2 className="text-2xl font-[900] mb-4 text-[#004D40] text-center max-w-xl leading-relaxed">
+                                    {question.text}
+                                </h2>
                             </div>
-                            <h2 className="text-2xl font-[900] mb-4 text-[#004D40] text-center max-w-xl leading-relaxed">
-                                {question.text}
-                            </h2>
-                        </div>
 
-                        {/* 질문 이미지 */}
-                        {question.image_url && (
-                            <div className="w-full max-w-md mb-4">
-                                <div className="h-[170px] mx-auto flex justify-center relative">
-                                    <div className="relative w-[302px] h-full">
-                                        <Image
-                                            src={question.image_url}
-                                            alt={`Question ${currentStep + 1} image`}
-                                            fill
-                                            sizes="(max-width: 768px) 100vw, 302px"
-                                            className="object-contain"
-                                            priority
-                                        />
+                            {/* 질문 이미지 */}
+                            {question.image_url && (
+                                <div className="w-full max-w-md mb-4">
+                                    <div className="h-[170px] mx-auto flex justify-center relative">
+                                        <div className="relative w-[302px] h-full">
+                                            <Image
+                                                src={question.image_url}
+                                                alt={`Question ${currentStep + 1} image`}
+                                                fill
+                                                sizes="(max-width: 768px) 100vw, 302px"
+                                                className="object-contain"
+                                                priority
+                                            />
+                                        </div>
                                     </div>
                                 </div>
+                            )}
+
+                            {/* 답변 버튼들 */}
+                            <div className="w-full max-w-md space-y-1.5">
+                                {question.answers.map((answer, idx) => (
+                                    <button
+                                        key={idx}
+                                        className={`
+                                            w-full py-2 px-3  
+                                            bg-white text-[#8D6E63] 
+                                            text-center font-[700] 
+                                            transition-all duration-300
+                                            hover:bg-[#004D40] hover:text-white hover:font-[900]
+                                            ${idx === 3 ? 'mb-4' : ''}
+                                        `}
+                                        onClick={() => handleAnswer(answer.text, answer.type)}
+                                    >
+                                        <span className="text-base">
+                                            {answer.text}
+                                        </span>
+                                    </button>
+                                ))}
                             </div>
-                        )}
-
-                        {/* 답변 버튼들 */}
-                        <div className="w-full max-w-md space-y-1.5">
-                            {question.answers.map((answer, idx) => (
-                                <button
-                                    key={idx}
-                                    className={`
-                                        w-full py-2 px-3  
-                                        bg-white text-[#8D6E63] 
-                                        text-center font-[700] 
-                                        transition-all duration-300
-                                        hover:bg-[#004D40] hover:text-white hover:font-[900]
-                                        ${idx === 3 ? 'mb-4' : ''}
-                                    `}
-                                    onClick={() => handleAnswer(answer.text, answer.type)}
-                                >
-                                    <span className="text-base">
-                                        {answer.text}
-                                    </span>
-                                </button>
-                            ))}
                         </div>
-                    </div>
-
-                    {/* 하단 배너 */}
-                    <div className="h-[100px] bg-white mb-2 max-w-md mx-auto overflow-hidden">
-                        {testData?.banners?.question?.[currentStep % (testData.banners.question?.length || 1)] && (
-                            <a
-                                href={testData.banners.question[currentStep % (testData.banners.question.length || 1)].landing_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block h-full w-full"
-                            >
-                                <Image
-                                    src={testData.banners.question[currentStep % (testData.banners.question.length || 1)].image_url}
-                                    alt="Advertisement"
-                                    width={448}
-                                    height={100}
-                                    style={{ width: '100%', height: 'auto' }}
-                                    className="object-cover"
-                                    priority
-                                />
-                            </a>
-                        )}
-                    </div>
-
-                    {/* 로고 */}
-                    <div className="flex justify-center mb-4">
-                        <a
-                            href="https://vegavery.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
-                        >
-                            <Image
-                                src="/logo/bk.png"
-                                alt="Vegavery Logo"
-                                width={100}
-                                height={30}
-                                style={{
-                                    width: '100px',
-                                    height: 'auto',
-                                    objectFit: 'contain'
-                                }}
-                            />
-                        </a>
                     </div>
                 </div>
             </div>
