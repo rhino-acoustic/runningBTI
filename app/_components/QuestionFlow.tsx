@@ -96,6 +96,11 @@ interface QuestionFlowProps {
             items: string[];
         }>;
     }>;
+    banners: {
+        start: Array<{ image_url: string; landing_url: string }>;
+        question: Array<{ image_url: string; landing_url: string }>;
+        result: Array<{ image_url: string; landing_url: string }>;
+    };
 }
 
 // MBTI 점수 인터페이스
@@ -124,7 +129,7 @@ interface Dimensions {
     JP: { [key in 'J' | 'P']: number };
 }
 
-export default function QuestionFlow({ testTitle, questions, results }: QuestionFlowProps) {
+export default function QuestionFlow({ testTitle, questions, results, banners }: QuestionFlowProps) {
     const [loadState, setLoadState] = useState<LoadState>('idle');
     const [pageState, setPageState] = useState<PageState>('start');
     const [testData, setTestData] = useState<TestData | null>(null);
