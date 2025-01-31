@@ -173,8 +173,13 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
     }, [stats.participants]);
 
-    // 이미지 프리로딩을 위한 함수
-    const preloadImages = (questions: Array<{ image_url: string | null }>, currentIndex: number = 0) => {
+    // 이미지 프리로딩을 위한 함수의 타입 수정
+    const preloadImages = (questions: Array<{ 
+        id: string; 
+        text: string; 
+        image_url?: string | null;
+        answers: Array<{ text: string; type: string; }>;
+    }>, currentIndex: number = 0) => {
         if (typeof window === 'undefined') return;
 
         // 현재 질문과 다음 질문의 이미지를 프리로드
