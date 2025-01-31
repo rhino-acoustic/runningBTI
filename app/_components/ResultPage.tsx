@@ -51,11 +51,15 @@ export function ResultPage({
                 logging: false,
                 imageTimeout: 0,
                 onclone: (clonedDoc) => {
-                    // HTMLCollection을 배열로 변환
                     const images = Array.from(clonedDoc.getElementsByTagName('img'));
                     images.forEach(img => {
-                        img.style.maxWidth = '100%';
-                        img.style.height = 'auto';
+                        if (img.closest('.relative')) {  // relative 컨테이너 내부의 이미지만 처리
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'contain';
+                            img.style.position = 'absolute';
+                            img.style.inset = '0';
+                        }
                     });
                 }
             });
@@ -112,7 +116,7 @@ export function ResultPage({
         <div className="w-full overflow-x-hidden animate-fade-in">
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
                 {/* 캡처될 영역 */}
-                <div id="capture-area" className="bg-white w-full max-w-[448px] mx-auto relative pb-4">
+                <div id="capture-area" className="bg-white w-full max-w-[448px] mx-auto relative">
                     {/* 워터마크 로고 패턴 */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
                         <div className="absolute inset-[-50%] w-[200%] h-[200%]">
@@ -197,42 +201,32 @@ export function ResultPage({
                         {/* 하단 배너 */}
                         <div className="w-full h-[100px] bg-white mb-4">
                             {bottomImage && (
-                                <a
-                                    href={bottomImage.landing_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block h-full"
-                                >
-                                    <div className="relative w-full h-full">
-                                        <Image
-                                            src={bottomImage.image_url}
-                                            alt="Advertisement"
-                                            fill
-                                            className="object-contain"
-                                            sizes="(max-width: 448px) 100vw, 448px"
-                                            priority
-                                        />
-                                    </div>
-                                </a>
+                                <div className="relative w-full h-full">
+                                    <Image
+                                        src={bottomImage.image_url}
+                                        alt="Advertisement"
+                                        fill
+                                        className="object-contain"
+                                        sizes="(max-width: 448px) 100vw, 448px"
+                                        priority
+                                        unoptimized  // 이미지 최적화 비활성화
+                                    />
+                                </div>
                             )}
                         </div>
 
                         {/* 로고 */}
-                        <div className="flex justify-center">
-                            <a
-                                href="https://vegavery.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block"
-                            >
+                        <div className="flex justify-center mb-4">
+                            <div className="relative w-[100px] h-[30px]">
                                 <Image
                                     src="/logo/bk.png"
                                     alt="Vegavery Logo"
-                                    width={100}
-                                    height={30}
-                                    className="h-auto"
+                                    fill
+                                    className="object-contain"
+                                    sizes="100px"
+                                    unoptimized  // 이미지 최적화 비활성화
                                 />
-                            </a>
+                            </div>
                         </div>
                     </div>
                 </div>
