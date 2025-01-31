@@ -709,23 +709,19 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                     </div>
 
                     {/* 하단 배너 */}
-                    <div className="h-[100px] bg-white mb-2 max-w-md mx-auto overflow-hidden">
+                    <div className="w-full max-w-[448px] h-[100px] mx-auto bg-white">
                         {testData?.banners?.question?.[currentStep % (testData.banners.question?.length || 1)] && (
-                            <a
-                                href={testData.banners.question[currentStep % (testData.banners.question.length || 1)].landing_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block h-full w-full"
-                            >
+                            <div className="relative w-full h-full">
                                 <Image
                                     src={testData.banners.question[currentStep % (testData.banners.question.length || 1)].image_url}
                                     alt="Advertisement"
-                                    width={448}
-                                    height={100}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    fill
+                                    className="object-contain"
+                                    sizes="(max-width: 448px) 100vw, 448px"
                                     priority
+                                    unoptimized
                                 />
-                            </a>
+                            </div>
                         )}
                     </div>
 

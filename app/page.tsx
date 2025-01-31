@@ -4,6 +4,7 @@ import { JWT } from 'google-auth-library';
 import type { TestData } from '@/types/testTypes';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ErrorFallback } from './_components/ErrorFallback';
+import Image from 'next/image';
 
 async function getSheetData() {
   try {
@@ -138,6 +139,22 @@ export default async function Home() {
             questions={data.content.questions}
             results={data.content.results}
           />
+          {/* 시작 페이지 배너 수정 */}
+          {data.banners.start.length > 0 && (
+            <div className="w-full max-w-[448px] h-[100px] mx-auto bg-white">
+                <div className="relative w-full h-full">
+                    <Image
+                        src={data.banners.start[0].image_url}
+                        alt="Advertisement"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 448px) 100vw, 448px"
+                        priority
+                        unoptimized
+                    />
+                </div>
+            </div>
+          )}
         </main>
       </ErrorBoundary>
     );
