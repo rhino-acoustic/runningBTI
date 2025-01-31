@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 
 export async function POST() {
     try {
+        console.log('=== Stats API 호출 ===');
+        
         const client = new JWT({
             email: process.env.GOOGLE_CLIENT_EMAIL,
             key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -15,11 +17,15 @@ export async function POST() {
         // 현재 참여자 수 가져오기
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.SHEET_ID,
-            range: 'Stats!A1'  // Stats 시트의 A1 셀
+            range: 'Stats!A1'
         });
-
+        
+        console.log('현재 참여자 수:', response.data.values?.[0]?.[0]);
+        
         const currentParticipants = Number(response.data.values?.[0]?.[0] || 0);
         const newParticipants = currentParticipants + 1;
+
+        console.log('새로운 참여자 수:', newParticipants);
 
         // 참여자 수 업데이트
         await sheets.spreadsheets.values.update({
@@ -31,9 +37,11 @@ export async function POST() {
             }
         });
 
+        console.log('업데이트 완료');
+
         return NextResponse.json({ participants: newParticipants });
     } catch (error) {
-        console.error('Failed to update stats:', error);
+        console.error('Stats API 에러:', error);
         return NextResponse.json(
             { error: 'Failed to update stats' },
             { status: 500 }
