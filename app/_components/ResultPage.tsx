@@ -41,7 +41,7 @@ export function ResultPage({
 }: ResultProps) {
     // 결과 이미지 저장
     const handleSave = async () => {
-        const element = document.querySelector('.result-capture-area');
+        const element = document.querySelector('.result-capture-area') as HTMLElement;
         if (!element) return;
 
         try {
