@@ -250,29 +250,31 @@ export function ResultPage({
                         {/* 하단 배너 */}
                         {bottomImage && (
                             <div className="w-full h-[100px] bg-white">
-                                <Image
-                                    src={bottomImage.image_url}
-                                    alt="Advertisement"
-                                    width={448}
-                                    height={100}
-                                    className="w-full h-full object-contain"
-                                    unoptimized
-                                    priority
-                                />
+                                <div className="relative w-full h-full">
+                                    <Image
+                                        src={bottomImage.image_url}
+                                        alt="Advertisement"
+                                        fill
+                                        className="object-contain"
+                                        unoptimized
+                                        priority
+                                    />
+                                </div>
                             </div>
                         )}
 
                         {/* 로고 */}
                         <div className="flex justify-center">
-                            <Image
-                                src="/logo/bk.png"
-                                alt="Vegavery Logo"
-                                width={100}
-                                height={30}
-                                className="w-[100px] h-auto"
-                                unoptimized
-                                priority
-                            />
+                            <div className="relative w-[100px] h-[30px]">
+                                <Image
+                                    src="/logo/bk.png"
+                                    alt="Vegavery Logo"
+                                    fill
+                                    className="object-contain"
+                                    unoptimized
+                                    priority
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -323,29 +325,31 @@ export function ResultPage({
                         {/* 하단 배너 */}
                         {bottomImage && (
                             <div className="w-full h-[100px] bg-white">
-                                <Image
-                                    src={bottomImage.image_url}
-                                    alt="Advertisement"
-                                    width={448}
-                                    height={100}
-                                    className="w-full h-full object-contain"
-                                    unoptimized
-                                    priority
-                                />
+                                <div className="relative w-full h-full">
+                                    <Image
+                                        src={bottomImage.image_url}
+                                        alt="Advertisement"
+                                        fill
+                                        className="object-contain"
+                                        unoptimized
+                                        priority
+                                    />
+                                </div>
                             </div>
                         )}
 
                         {/* 로고 */}
                         <div className="flex justify-center">
-                            <Image
-                                src="/logo/bk.png"
-                                alt="Vegavery Logo"
-                                width={100}
-                                height={30}
-                                className="w-[100px] h-auto"
-                                unoptimized
-                                priority
-                            />
+                            <div className="relative w-[100px] h-[30px]">
+                                <Image
+                                    src="/logo/bk.png"
+                                    alt="Vegavery Logo"
+                                    fill
+                                    className="object-contain"
+                                    unoptimized
+                                    priority
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

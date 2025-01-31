@@ -73,12 +73,12 @@ export const ResultCard = ({
 
             {/* 카테고리 */}
             <foreignObject x="20" y="240" width={width-40} height="400">
-                <div xmlns="http://www.w3.org/1999/xhtml"
-                     style={{
-                         display: 'flex',
-                         flexDirection: 'column',
-                         gap: '8px'
-                     }}
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px'
+                    }}
                 >
                     {categories.map((category, idx) => (
                         <div key={idx} style={{
