@@ -1,10 +1,32 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import html2canvas from 'html2canvas';
+import domtoimage from 'dom-to-image-more';
 import { CountUpNumber } from './CountUpNumber';
 import Image from 'next/image';
 import { SaveIcon, ShareIcon, RestartIcon } from '../../components/Icons';
 import { ResultCard } from './ResultCard';
+import html2canvas from 'html2canvas';
+import confetti from 'canvas-confetti';
+
+// 상단에 타입 선언 추가
+declare module 'dom-to-image-more' {
+    export interface DomToImageOptions {
+        quality?: number;
+        bgcolor?: string;
+        cacheBust?: boolean;
+        style?: {
+            transform?: string;
+            transformOrigin?: string;
+        };
+        fontEmbedCSS?: string;
+        filter?: (node: Element) => boolean;
+    }
+
+    export function toPng(node: HTMLElement, options?: DomToImageOptions): Promise<string>;
+    export function toJpeg(node: HTMLElement, options?: DomToImageOptions): Promise<string>;
+    export function toBlob(node: HTMLElement, options?: DomToImageOptions): Promise<Blob>;
+    export function toPixelData(node: HTMLElement, options?: DomToImageOptions): Promise<Uint8ClampedArray>;
+}
 
 // 이미지 관련 인터페이스 제거
 interface ResultProps {
@@ -85,24 +107,58 @@ export function ResultPage({
 }: ResultProps) {
     // 결과 이미지 저장
     const handleSave = async () => {
+        const element = document.getElementById('capture-area');
+        if (!element) return;
+
         try {
-            const element = document.getElementById('capture-area');
-            if (!element) {
-                throw new Error('Element not found');
-            }
+            // 이미지 로딩 대기
+            const images = element.getElementsByTagName('img');
+            await Promise.all(
+                Array.from(images).map(
+                    (img) =>
+                        new Promise((resolve) => {
+                            if (img.complete) {
+                                resolve(null);
+                            } else {
+                                img.onload = () => resolve(null);
+                                img.onerror = () => resolve(null);
+                            }
+                        })
+                )
+            );
 
             const canvas = await html2canvas(element, {
                 backgroundColor: '#FFFFFF',
                 scale: 2,
                 useCORS: true,
-                allowTaint: true
+                allowTaint: true,
+                logging: true,
+                onclone: (clonedDoc) => {
+                    const images = clonedDoc.getElementsByTagName('img');
+                    Array.from(images).forEach(img => {
+                        if (img.src.startsWith('/')) {
+                            img.src = window.location.origin + img.src;
+                        }
+                    });
+                }
             });
 
-            const pngUrl = canvas.toDataURL('image/png');
+            // PNG 품질 설정을 추가하여 변환
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
+            
+            // 다운로드
             const link = document.createElement('a');
             link.download = `${result.type}_result.png`;
-            link.href = pngUrl;
+            link.href = dataUrl;
             link.click();
+
+            // 성공시 효과
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
         } catch (error) {
             console.error('이미지 저장 실패:', error);
             alert('이미지 저장에 실패했습니다.');
@@ -235,8 +291,48 @@ export function ResultPage({
                 </div>
 
                 {/* 캡처를 위한 숨겨진 영역 */}
-                <div id="capture-area" className="hidden">
-                    <div className="w-[448px] bg-white p-4">
+                <div 
+                    id="capture-area" 
+                    className="absolute left-[-9999px]"
+                    style={{ width: '448px' }}
+                >
+                    <div className="bg-white p-4">
+                        {/* 제목 */}
+                        <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
+                            {testTitle}
+                        </h1>
+
+                        {/* 결과 내용 */}
+                        <div className="text-center mb-6">
+                            <h2 className="type-title font-bold text-2xl mb-1">
+                                {userName ? (
+                                    <span className="inline">
+                                        <span className="text-[#004D40]">{userName}</span>
+                                        <span className="mx-1">님은</span>
+                                    </span>
+                                ) : null}
+                                <span>{result.type} {result.title}</span>
+                            </h2>
+                            <p className="description text-lg mb-0">
+                                {result.description}
+                            </p>
+                        </div>
+                        
+                        {/* 특성 목록 */}
+                        <div className="characteristics mb-4">
+                            <div className="characteristic-group">
+                                <div className="space-y-1">
+                                    {result.categories.map((category, index) => (
+                                        <ResultSection
+                                            key={index}
+                                            title={category.title}
+                                            items={category.items}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* 하단 배너 */}
                         {bottomImage && (
                             <div className="w-full h-[100px] bg-white">
@@ -244,6 +340,7 @@ export function ResultPage({
                                     src={bottomImage.image_url}
                                     alt="Advertisement"
                                     className="w-full h-full object-contain"
+                                    crossOrigin="anonymous"
                                 />
                             </div>
                         )}
@@ -254,6 +351,7 @@ export function ResultPage({
                                 src="/logo/bk.png"
                                 alt="Vegavery Logo"
                                 className="w-[100px] h-auto"
+                                crossOrigin="anonymous"
                             />
                         </div>
                     </div>

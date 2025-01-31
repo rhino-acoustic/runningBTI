@@ -5,31 +5,26 @@
 /* Freesentation 폰트 설정 */
 @font-face {
     font-family: 'Freesentation';
-    src: url('/fonts/Freesentation-4Regular.ttf') format('truetype');
     font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+    src: url('/fonts/Freesentation-4Regular.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'Freesentation';
-    src: url('/fonts/Freesentation-5Medium.ttf') format('truetype');
     font-weight: 500;
-    font-display: swap;
+    src: url('/fonts/Freesentation-5Medium.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'Freesentation';
-    src: url('/fonts/Freesentation-6SemiBold.ttf') format('truetype');
     font-weight: 600;
-    font-display: swap;
+    src: url('/fonts/Freesentation-6SemiBold.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'Freesentation';
-    src: url('/fonts/Freesentation-7Bold.ttf') format('truetype');
     font-weight: 700;
-    font-display: swap;
+    src: url('/fonts/Freesentation-7Bold.ttf') format('truetype');
 }
 
 /* 기본 스타일 */
