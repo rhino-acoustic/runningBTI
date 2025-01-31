@@ -125,14 +125,15 @@ export async function GET() {
         sheetCache.set(CACHE_KEY, data);
 
         return NextResponse.json(data);
-    } catch (error) {
+    } catch (error: unknown) {
+        const err = error as Error;
         console.error('Detailed API Error:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
+            message: err.message,
+            stack: err.stack,
+            name: err.name
         });
         return NextResponse.json(
-            { error: 'Failed to fetch data', details: error.message },
+            { error: 'Failed to fetch data', details: err.message },
             { status: 500 }
         );
     }
