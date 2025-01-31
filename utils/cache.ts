@@ -27,4 +27,4 @@ class Cache<T> {
     }
 }
 
-export const sheetCache = new Cache(30 * 60 * 1000); 
+export const sheetCache = new Cache(30 * 60 * 1000); // 30분 

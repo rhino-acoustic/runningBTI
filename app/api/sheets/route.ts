@@ -55,6 +55,18 @@ interface SpreadsheetData {
     };
 }
 
+async function fetchWithRetry(fn: () => Promise<any>, retries = 3, delay = 1000) {
+    try {
+        return await fn();
+    } catch (error) {
+        if (retries > 0 && error.message.includes('Quota exceeded')) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchWithRetry(fn, retries - 1, delay * 2);
+        }
+        throw error;
+    }
+}
+
 export async function GET() {
     const CACHE_KEY = 'sheet_data';
     
@@ -107,21 +119,21 @@ export async function GET() {
             }), {})
         });
 
-        // Google Auth 클라이언트 생성
-        const client = new JWT({
-            email: process.env.GOOGLE_CLIENT_EMAIL,
-            key: process.env.GOOGLE_PRIVATE_KEY,
-            scopes: ['https://www.googleapis.com/auth/spreadsheets']
-        });
+        const data = await fetchWithRetry(async () => {
+            const client = new JWT({
+                email: process.env.GOOGLE_CLIENT_EMAIL,
+                key: process.env.GOOGLE_PRIVATE_KEY,
+                scopes: ['https://www.googleapis.com/auth/spreadsheets']
+            });
 
-        const sheets = google.sheets({ version: 'v4', auth: client });
-        
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: process.env.SHEET_ID,
-            range: 'A:Z'
-        });
+            const sheets = google.sheets({ version: 'v4', auth: client });
+            const response = await sheets.spreadsheets.values.get({
+                spreadsheetId: process.env.SHEET_ID,
+                range: 'A:Z'
+            });
 
-        const data = parseSpreadsheetData(response.data.values || []);
+            return parseSpreadsheetData(response.data.values || []);
+        });
         
         // 데이터 캐싱
         sheetCache.set(CACHE_KEY, data);

@@ -6,7 +6,6 @@ import { Spinner } from '../../components/Spinner';
 import { ExclamationIcon } from '../../components/ExclamationIcon';
 import { CountUpNumber } from './CountUpNumber';
 import Image from 'next/image';
-import { preload } from 'next/image';
 
 // 상태 타입 정의
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
@@ -180,7 +179,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         
         questions.forEach(question => {
             if (question.image_url) {
-                const img = new window.Image();
+                const img = new window.Image();  // 브라우저의 Image 생성자 사용
                 img.src = question.image_url;
             }
         });
@@ -441,63 +440,28 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
     // 에러 화면
     if (loadState === 'error' && error) {
-        const errorInfo = {
-            type: error.type,
-            message: error.message,
-            details: error.details
-        };
-
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3] p-4">
-                <div className="w-full max-w-md">
-                    <div className="flex items-center mb-4 text-red-600">
-                        <ExclamationIcon />
-                        <span className="ml-2 font-bold">오류가 발생했습니다</span>
-                    </div>
-                    <p className="mb-4 text-[#8D6E63]">{error.message}</p>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => {
-                                navigator.clipboard.writeText(JSON.stringify(errorInfo, null, 2));
-                                alert('에러 정보가 복사되었습니다.');
-                            }}
-                            className="flex items-center gap-1 text-sm text-[#8D6E63] hover:text-[#5D4037]"
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                data-oid="copy-icon"
+            <div className="w-full overflow-x-hidden">
+                <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
+                    <div className="flex-1 flex flex-col items-center justify-center p-4">
+                        <div className="w-full max-w-md text-center">
+                            <div className="text-red-600 mb-4">
+                                <ExclamationIcon />
+                            </div>
+                            <h1 className="text-xl font-bold text-[#004D40] mb-2">
+                                일시적인 오류가 발생했습니다
+                            </h1>
+                            <p className="text-[#8D6E63] mb-4">
+                                잠시 후 다시 시도해주세요
+                            </p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-2 bg-[#004D40] text-white rounded hover:bg-opacity-90 transition-colors"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                                    data-oid="qs-d1-d"
-                                />
-                            </svg>
-                            복사
-                        </button>
+                                새로고침
+                            </button>
+                        </div>
                     </div>
-                    <pre className="mt-2 p-4 bg-red-50 text-red-600 rounded-lg text-sm whitespace-pre-wrap w-full cursor-text select-text">
-                        {JSON.stringify(errorInfo, null, 2)}
-                    </pre>
-                </div>
-                <div className="mt-6 flex gap-4">
-                    <button
-                        className="px-6 py-2 bg-[#004D40] text-white hover:bg-opacity-90"
-                        onClick={() => window.location.reload()}
-                    >
-                        다시 시도
-                    </button>
-                    <button
-                        className="px-6 py-2 border-2 border-[#8D6E63] text-[#8D6E63] hover:bg-[#8D6E63] hover:text-white"
-                        onClick={() => console.log('현재 상태:', { error, testData })}
-                    >
-                        디버그 정보
-                    </button>
                 </div>
             </div>
         );
