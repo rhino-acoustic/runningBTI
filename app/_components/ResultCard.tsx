@@ -58,14 +58,14 @@ export const ResultCard = ({
 
             {/* 설명 */}
             <foreignObject x="20" y="120" width={width-40} height="100">
-                <p xmlns="http://www.w3.org/1999/xhtml"
-                   style={{
-                       margin: 0,
-                       textAlign: 'center',
-                       color: '#8D6E63',
-                       fontSize: '16px',
-                       lineHeight: 1.6
-                   }}
+                <p
+                    style={{
+                        margin: 0,
+                        textAlign: 'center',
+                        color: '#8D6E63',
+                        fontSize: '14px',
+                        lineHeight: 1.5
+                    }}
                 >
                     {description}
                 </p>

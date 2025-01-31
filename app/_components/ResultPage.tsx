@@ -111,28 +111,11 @@ export function ResultPage({
         if (!element) return;
 
         try {
-            // 이미지 로딩 대기
-            const images = element.getElementsByTagName('img');
-            await Promise.all(
-                Array.from(images).map(
-                    (img) =>
-                        new Promise((resolve) => {
-                            if (img.complete) {
-                                resolve(null);
-                            } else {
-                                img.onload = () => resolve(null);
-                                img.onerror = () => resolve(null);
-                            }
-                        })
-                )
-            );
-
             const canvas = await html2canvas(element, {
                 backgroundColor: '#FFFFFF',
                 scale: 2,
                 useCORS: true,
                 allowTaint: true,
-                logging: true,
                 onclone: (clonedDoc) => {
                     const images = clonedDoc.getElementsByTagName('img');
                     Array.from(images).forEach(img => {
@@ -143,21 +126,25 @@ export function ResultPage({
                 }
             });
 
-            // PNG 품질 설정을 추가하여 변환
-            const dataUrl = canvas.toDataURL('image/png', 1.0);
-            
-            // 다운로드
-            const link = document.createElement('a');
-            link.download = `${result.type}_result.png`;
-            link.href = dataUrl;
-            link.click();
+            // 캔버스를 Blob으로 변환
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `${result.type}_result.png`;
+                link.href = url;
+                link.click();
+                
+                // 성공시 효과
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
 
-            // 성공시 효과
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
+                URL.revokeObjectURL(url);
+            }, 'image/png', 1.0);
 
         } catch (error) {
             console.error('이미지 저장 실패:', error);
@@ -336,22 +323,28 @@ export function ResultPage({
                         {/* 하단 배너 */}
                         {bottomImage && (
                             <div className="w-full h-[100px] bg-white">
-                                <img
+                                <Image
                                     src={bottomImage.image_url}
                                     alt="Advertisement"
+                                    width={448}
+                                    height={100}
                                     className="w-full h-full object-contain"
-                                    crossOrigin="anonymous"
+                                    unoptimized
+                                    priority
                                 />
                             </div>
                         )}
 
                         {/* 로고 */}
                         <div className="flex justify-center">
-                            <img
+                            <Image
                                 src="/logo/bk.png"
                                 alt="Vegavery Logo"
+                                width={100}
+                                height={30}
                                 className="w-[100px] h-auto"
-                                crossOrigin="anonymous"
+                                unoptimized
+                                priority
                             />
                         </div>
                     </div>
