@@ -173,24 +173,47 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
     }, [stats.participants]);
 
-    // 초기 참여자 수 로딩
+    // 데이터 로드
     useEffect(() => {
-        const loadStats = async () => {
+        const loadData = async () => {
             try {
-                const response = await fetch('/api/stats', {
-                    method: 'GET'  // GET 메서드로 현재 카운트만 가져오기
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setStats({ participants: data.participants });
+                setLoadState('loading');
+                
+                // 병렬로 데이터 로딩
+                const [testResponse, statsResponse] = await Promise.all([
+                    fetch('/api/sheets'),
+                    fetch('/api/stats')
+                ]);
+                
+                if (!testResponse.ok || !statsResponse.ok) {
+                    throw new Error('Failed to fetch data');
                 }
-            } catch (error) {
-                console.error('Failed to load stats:', error);
+
+                const [testData, statsData] = await Promise.all([
+                    testResponse.json(),
+                    statsResponse.json()
+                ]);
+                
+                if (!testData?.content) {
+                    throw new Error('Invalid data structure');
+                }
+
+                setTestData(testData);
+                setStats({ participants: statsData.participants });
+                setLoadState('ready');
+            } catch (err) {
+                console.error('데이터 로드 실패:', err);
+                setError({
+                    type: 'FETCH_ERROR',
+                    message: '데이터를 가져오는데 실패했습니다',
+                    details: err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
+                });
+                setLoadState('error');
             }
         };
 
-        loadStats();
-    }, []);  // 컴포넌트 마운트 시 한 번만 실행
+        loadData();
+    }, []);
 
     // 결과 계산 함수
     const calculateResult = () => {
@@ -242,52 +265,6 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
             });
         }
     };
-
-    // 데이터 로드
-    useEffect(() => {
-        const loadTestData = async () => {
-            try {
-                setLoadState('loading');
-                const response = await fetch('/api/sheets');
-                
-                if (!response.ok) {
-                    setError({
-                        type: 'FETCH_ERROR',
-                        message: '데이터를 가져오는데 실패했습니다',
-                        details: `Status: ${response.status}`
-                    });
-                    setLoadState('error');
-                    return;
-                }
-
-                const data: TestData = await response.json();
-                
-                if (!data?.content) {
-                    setError({
-                        type: 'PARSE_ERROR',
-                        message: '잘못된 데이터 형식입니다',
-                        details: 'Invalid data structure'
-                    });
-                    setLoadState('error');
-                    return;
-                }
-
-                setTestData(data);
-                setLoadState('ready');
-            } catch (err) {
-                console.error('데이터 로드 실패:', err);
-                const errorState: ErrorState = {
-                    type: 'FETCH_ERROR',
-                    message: '데이터를 가져오는데 실패했습니다',
-                    details: err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
-                };
-                setError(errorState);
-                setLoadState('error');
-            }
-        };
-
-        loadTestData();
-    }, []);
 
     // 참여 기록
     const recordParticipation = async () => {
@@ -404,6 +381,27 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         }
     };
 
+    // 참여자 수 표시 컴포넌트
+    const ParticipantCount = ({ count }: { count: number }) => {
+        const [isLoading, setIsLoading] = useState(true);
+
+        useEffect(() => {
+            if (count > 0) {
+                setIsLoading(false);
+            }
+        }, [count]);
+
+        if (isLoading) {
+            return (
+                <div className="animate-pulse">
+                    <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                </div>
+            );
+        }
+
+        return <span>현재 {count}명이 참여했어요</span>;
+    };
+
     // 로딩 화면
     if (loadState === 'loading') {
         return (
@@ -513,12 +511,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                         {/* 참여자 수 */}
                         <p className="text-sm font-[400] text-[#8D6E63] mb-1">
                             현재{' '}
-                            {stats ? (
-                                <CountUpNumber end={stats.participants} />
-                            ) : (
-                                '...'
-                            )}{' '}
-                            명이 참여했어요
+                            <ParticipantCount count={stats.participants} />
                         </p>
 
                         <div className="w-full max-w-md flex flex-col gap-2">

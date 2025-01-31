@@ -27,4 +27,4 @@ class Cache<T> {
     }
 }
 
-export const sheetCache = new Cache(); 
+export const sheetCache = new Cache(5 * 60 * 1000); 
