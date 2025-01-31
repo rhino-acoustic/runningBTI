@@ -6,6 +6,7 @@ import { Spinner } from '../../components/Spinner';
 import { ExclamationIcon } from '../../components/ExclamationIcon';
 import { CountUpNumber } from './CountUpNumber';
 import Image from 'next/image';
+import { preload } from 'next/image';
 
 // 상태 타입 정의
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
@@ -177,8 +178,9 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     const preloadImages = (questions: Array<{ image_url: string | null }>) => {
         questions.forEach(question => {
             if (question.image_url) {
-                const img = new Image();
-                img.src = question.image_url;
+                preload(question.image_url, {
+                    sizes: "(max-width: 768px) 100vw, 302px"
+                });
             }
         });
     };
