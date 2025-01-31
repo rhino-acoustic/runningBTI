@@ -59,7 +59,8 @@ async function fetchWithRetry(fn: () => Promise<any>, retries = 3, delay = 1000)
     try {
         return await fn();
     } catch (error) {
-        if (retries > 0 && error.message.includes('Quota exceeded')) {
+        // error 타입 체크
+        if (retries > 0 && error instanceof Error && error.message.includes('Quota exceeded')) {
             await new Promise(resolve => setTimeout(resolve, delay));
             return fetchWithRetry(fn, retries - 1, delay * 2);
         }
