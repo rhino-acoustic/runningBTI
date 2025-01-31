@@ -67,26 +67,24 @@ export function ResultPage({
                 }
             });
 
-            // 모바일 환경 체크
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-            if (isMobile) {
-                // 모바일에서는 새 탭에서 이미지 열기
-                const dataUrl = canvas.toDataURL('image/png');
-                window.open(dataUrl, '_blank');
-            } else {
-                // PC에서는 다운로드
-                canvas.toBlob((blob) => {
-                    if (!blob) return;
-                    
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = `${result.type}_result.png`;
-                    link.href = url;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                }, 'image/png', 1.0);
+            // 이미지 데이터 URL 생성
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
+            
+            // 다운로드 링크 생성
+            const link = document.createElement('a');
+            link.download = `${result.type}_result.png`;
+            link.href = dataUrl;
+            
+            // iOS Safari를 위한 특별 처리
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
             }
+            
+            // 링크 클릭
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
         } catch (error) {
             console.error('이미지 저장 실패:', error);
