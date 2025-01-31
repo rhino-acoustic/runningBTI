@@ -121,10 +121,16 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // 1시간마다 재검증
 
 export default async function Home() {
+  const data = await getSheetData();  // 데이터 가져오기 추가
+  
   return (
     <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <main className="flex min-h-screen flex-col items-center justify-between">
-        {/* ... 기존 코드 ... */}
+        <QuestionFlow 
+          testTitle={data.meta.title}
+          questions={data.content.questions}
+          results={data.content.results}
+        />
       </main>
     </ErrorBoundary>
   );

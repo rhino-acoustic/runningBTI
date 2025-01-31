@@ -73,15 +73,13 @@ export async function GET() {
             );
         }
 
-        // 환경 변수 체크
+        // 환경변수 체크 로깅 추가
         console.log('=== 환경변수 체크 ===');
         console.log({
-            GOOGLE_PROJECT_ID: process.env.GOOGLE_PROJECT_ID?.slice(0, 4) + '...',
-            GOOGLE_CLIENT_EMAIL: process.env.GOOGLE_CLIENT_EMAIL?.slice(0, 4) + '...',
-            GOOGLE_PRIVATE_KEY: '설정됨',
-            SHEET_ID: process.env.SHEET_ID?.slice(0, 4) + '...',
-            AUTH_URI: '설정됨',
-            TOKEN_URI: '설정됨'
+            hasProjectId: !!process.env.GOOGLE_PROJECT_ID,
+            hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
+            hasPrivateKey: !!process.env.GOOGLE_PRIVATE_KEY,
+            hasSheetId: !!process.env.SHEET_ID
         });
 
         // 자격 증명 객체 생성
@@ -128,12 +126,13 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (error) {
-        console.error('Error in /api/sheets:', error);
+        console.error('Detailed API Error:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
         return NextResponse.json(
-            { 
-                error: 'Failed to fetch data',
-                details: error instanceof Error ? error.message : 'Unknown error'
-            },
+            { error: 'Failed to fetch data', details: error.message },
             { status: 500 }
         );
     }
