@@ -63,6 +63,18 @@ const DisplayImage = ({ src, alt, width, height, className }: {
     );
 };
 
+// 이미지를 base64로 변환하는 함수 추가
+const getBase64Image = async (url: string): Promise<string> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+};
+
 export function ResultPage({
     testTitle,
     result,
@@ -83,15 +95,7 @@ export function ResultPage({
                 backgroundColor: '#FFFFFF',
                 scale: 2,
                 useCORS: true,
-                allowTaint: true,
-                proxy: undefined,
-                imageTimeout: 0,
-                onclone: (clonedDoc) => {
-                    const images = clonedDoc.getElementsByTagName('img');
-                    Array.from(images).forEach(img => {
-                        img.setAttribute('crossorigin', 'anonymous');
-                    });
-                }
+                allowTaint: true
             });
 
             const pngUrl = canvas.toDataURL('image/png');
@@ -161,78 +165,9 @@ export function ResultPage({
     return (
         <div className="w-full overflow-x-hidden">
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                {/* 화면에 보이는 영역 */}
-                <div className="w-full bg-white max-w-[448px] mx-auto p-4">
+                {/* 결과 영역 */}
+                <div id="capture-area" className="w-full bg-white max-w-[448px] mx-auto p-4">
                     <div className="w-full">
-                        {/* 제목 */}
-                        <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
-                            {testTitle}
-                        </h1>
-
-                        {/* 결과 내용 */}
-                        <div className="text-center mb-6">
-                            <h2 className="type-title font-bold text-2xl mb-1">
-                                {userName ? (
-                                    <span className="inline">
-                                        <span className="text-[#004D40]">{userName}</span>
-                                        <span className="mx-1">님은</span>
-                                    </span>
-                                ) : null}
-                                <span>{result.type} {result.title}</span>
-                            </h2>
-                            <p className="description text-lg mb-0">
-                                {result.description}
-                            </p>
-                        </div>
-                        
-                        {/* 특성 목록 */}
-                        <div className="characteristics mb-4">
-                            <div className="characteristic-group">
-                                <div className="space-y-1">
-                                    {result.categories.map((category, index) => (
-                                        <ResultSection
-                                            key={index}
-                                            title={category.title}
-                                            items={category.items}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 하단 배너 */}
-                        {bottomImage && (
-                            <div className="w-full h-[100px] bg-white">
-                                <Image
-                                    src={bottomImage.image_url}
-                                    alt="Advertisement"
-                                    width={448}
-                                    height={100}
-                                    className="w-full h-full object-contain"
-                                    unoptimized
-                                    priority
-                                />
-                            </div>
-                        )}
-
-                        {/* 로고 */}
-                        <div className="flex justify-center">
-                            <Image
-                                src="/logo/bk.png"
-                                alt="Vegavery Logo"
-                                width={100}
-                                height={30}
-                                className="w-[100px] h-auto"
-                                unoptimized
-                                priority
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 캡처를 위한 숨겨진 영역 */}
-                <div id="capture-area" className="hidden">
-                    <div className="w-[448px] bg-white p-4">
                         {/* 제목 */}
                         <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
                             {testTitle}
@@ -276,7 +211,6 @@ export function ResultPage({
                                     src={bottomImage.image_url}
                                     alt="Advertisement"
                                     className="w-full h-full object-contain"
-                                    crossOrigin="anonymous"
                                 />
                             </div>
                         )}
@@ -287,7 +221,6 @@ export function ResultPage({
                                 src="/logo/bk.png"
                                 alt="Vegavery Logo"
                                 className="w-[100px] h-auto"
-                                crossOrigin="anonymous"
                             />
                         </div>
                     </div>
