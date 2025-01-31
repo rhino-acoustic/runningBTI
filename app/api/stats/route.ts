@@ -47,4 +47,31 @@ export async function POST() {
             { status: 500 }
         );
     }
+}
+
+export async function GET() {
+    try {
+        const client = new JWT({
+            email: process.env.GOOGLE_CLIENT_EMAIL,
+            key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            scopes: ['https://www.googleapis.com/auth/spreadsheets']
+        });
+
+        const sheets = google.sheets({ version: 'v4', auth: client });
+        
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: process.env.SHEET_ID,
+            range: 'Stats!A1'
+        });
+        
+        const currentParticipants = Number(response.data.values?.[0]?.[0] || 0);
+        
+        return NextResponse.json({ participants: currentParticipants });
+    } catch (error) {
+        console.error('Failed to get stats:', error);
+        return NextResponse.json(
+            { error: 'Failed to get stats' },
+            { status: 500 }
+        );
+    }
 } 

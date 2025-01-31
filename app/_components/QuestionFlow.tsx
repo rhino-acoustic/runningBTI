@@ -173,6 +173,25 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
     }, [stats.participants]);
 
+    // 초기 참여자 수 로딩
+    useEffect(() => {
+        const loadStats = async () => {
+            try {
+                const response = await fetch('/api/stats', {
+                    method: 'GET'  // GET 메서드로 현재 카운트만 가져오기
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setStats({ participants: data.participants });
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        };
+
+        loadStats();
+    }, []);  // 컴포넌트 마운트 시 한 번만 실행
+
     // 결과 계산 함수
     const calculateResult = () => {
         if (!testData) return;
