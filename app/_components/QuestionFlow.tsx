@@ -140,7 +140,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     const [mbtiResult, setMBTIResult] = useState<MBTIResult | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-    const [imageCache, setImageCache] = useState<Set<string>>(new Set());
+    const [imageCache, setImageCache] = useState<string[]>([]);
 
     // localStorage 초기화를 useEffect로 이동
     useEffect(() => {
@@ -175,7 +175,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
     }, [stats.participants]);
 
-    // 이미지 프리로딩 함수 개선
+    // 이미지 프리로딩 함수 수정
     const preloadImages = useCallback((questions: Array<{ 
         id: string; 
         text: string; 
@@ -189,13 +189,13 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
             questions[currentIndex - 1]?.image_url,  // 이전 이미지
             questions[currentIndex]?.image_url,      // 현재 이미지
             questions[currentIndex + 1]?.image_url   // 다음 이미지
-        ].filter((url): url is string => !!url && !imageCache.has(url));
+        ].filter((url): url is string => !!url && !imageCache.includes(url));
 
         // 새로운 이미지만 프리로드
         imagesToPreload.forEach(url => {
             const img = new window.Image();
             img.src = url;
-            setImageCache(prev => new Set([...prev, url]));
+            setImageCache(prev => [...prev, url]);
         });
     }, [imageCache]);
 

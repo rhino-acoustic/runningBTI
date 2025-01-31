@@ -161,12 +161,78 @@ export function ResultPage({
     return (
         <div className="w-full overflow-x-hidden">
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                {/* 캡처 영역 - flex-1 제거하고 pb-16 추가 */}
-                <div 
-                    id="capture-area" 
-                    className="w-full bg-white max-w-[448px] mx-auto p-4"
-                >
+                {/* 화면에 보이는 영역 */}
+                <div className="w-full bg-white max-w-[448px] mx-auto p-4">
                     <div className="w-full">
+                        {/* 제목 */}
+                        <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
+                            {testTitle}
+                        </h1>
+
+                        {/* 결과 내용 */}
+                        <div className="text-center mb-6">
+                            <h2 className="type-title font-bold text-2xl mb-1">
+                                {userName ? (
+                                    <span className="inline">
+                                        <span className="text-[#004D40]">{userName}</span>
+                                        <span className="mx-1">님은</span>
+                                    </span>
+                                ) : null}
+                                <span>{result.type} {result.title}</span>
+                            </h2>
+                            <p className="description text-lg mb-0">
+                                {result.description}
+                            </p>
+                        </div>
+                        
+                        {/* 특성 목록 */}
+                        <div className="characteristics mb-4">
+                            <div className="characteristic-group">
+                                <div className="space-y-1">
+                                    {result.categories.map((category, index) => (
+                                        <ResultSection
+                                            key={index}
+                                            title={category.title}
+                                            items={category.items}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 하단 배너 */}
+                        {bottomImage && (
+                            <div className="w-full h-[100px] bg-white">
+                                <Image
+                                    src={bottomImage.image_url}
+                                    alt="Advertisement"
+                                    width={448}
+                                    height={100}
+                                    className="w-full h-full object-contain"
+                                    unoptimized
+                                    priority
+                                />
+                            </div>
+                        )}
+
+                        {/* 로고 */}
+                        <div className="flex justify-center">
+                            <Image
+                                src="/logo/bk.png"
+                                alt="Vegavery Logo"
+                                width={100}
+                                height={30}
+                                className="w-[100px] h-auto"
+                                unoptimized
+                                priority
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 캡처를 위한 숨겨진 영역 */}
+                <div id="capture-area" className="hidden">
+                    <div className="w-[448px] bg-white p-4">
                         {/* 제목 */}
                         <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
                             {testTitle}
