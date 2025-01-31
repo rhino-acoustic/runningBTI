@@ -1,48 +1,30 @@
-type CacheData = {
-    data: any;
-    timestamp: number;
-};
+class Cache<T> {
+    private cache: Map<string, { data: T; timestamp: number }>;
+    private ttl: number; // Time to live in milliseconds
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5분
-
-class SheetCache {
-    private static instance: SheetCache;
-    private cache: Map<string, CacheData>;
-
-    private constructor() {
+    constructor(ttl = 3600000) { // 기본 1시간
         this.cache = new Map();
+        this.ttl = ttl;
     }
 
-    static getInstance(): SheetCache {
-        if (!SheetCache.instance) {
-            SheetCache.instance = new SheetCache();
+    get(key: string): T | null {
+        const item = this.cache.get(key);
+        if (!item) return null;
+
+        if (Date.now() - item.timestamp > this.ttl) {
+            this.cache.delete(key);
+            return null;
         }
-        return SheetCache.instance;
+
+        return item.data;
     }
 
-    set(key: string, data: any): void {
+    set(key: string, data: T): void {
         this.cache.set(key, {
             data,
             timestamp: Date.now()
         });
     }
-
-    get(key: string): any | null {
-        const cached = this.cache.get(key);
-        if (!cached) return null;
-
-        const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
-        if (isExpired) {
-            this.cache.delete(key);
-            return null;
-        }
-
-        return cached.data;
-    }
-
-    clear(): void {
-        this.cache.clear();
-    }
 }
 
-export const sheetCache = SheetCache.getInstance(); 
+export const sheetCache = new Cache(); 

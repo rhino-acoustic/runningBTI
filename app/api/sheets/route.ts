@@ -2,23 +2,75 @@ import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 import { sheetCache } from '../../../utils/cache';
 
+// 필요한 자격 증명 필드를 정의하는 인터페이스
+interface Credentials {
+    type: string;
+    project_id: string | undefined;
+    private_key_id: string | undefined;
+    private_key: string | undefined;
+    client_email: string | undefined;
+    client_id: string | undefined;
+    auth_uri: string | undefined;
+    token_uri: string | undefined;
+    auth_provider_x509_cert_url: string | undefined;
+    client_x509_cert_url: string | undefined;
+}
+
+// 자격 증명 상태를 위한 인터페이스
+interface CredentialsStatus {
+    [key: string]: string;  // 인덱스 시그니처 추가
+}
+
+interface SpreadsheetData {
+    meta: {
+        title: string;
+        description: string;
+        main_image: string;
+    };
+    banners: {
+        start: Array<{ image_url: string; landing_url: string }>;
+        question: Array<{ image_url: string; landing_url: string }>;
+        result: Array<{ image_url: string; landing_url: string }>;
+    };
+    content: {
+        questions: Array<{
+            id: string;
+            text: string;
+            image_url: string | null;
+            answers: Array<{
+                text: string;
+                type: string;
+            }>;
+        }>;
+        results: Array<{
+            type: string;
+            title: string;
+            description: string;
+            categories: Array<{
+                title: string;
+                items: string[];
+            }>;
+        }>;
+    };
+}
+
 export async function GET() {
     const CACHE_KEY = 'sheet_data';
     
     try {
-        // 환경변수 체크 로그 추가
+        // 환경 변수 체크
         console.log('=== 환경변수 체크 ===');
         console.log({
             GOOGLE_PROJECT_ID: process.env.GOOGLE_PROJECT_ID?.slice(0, 4) + '...',
             GOOGLE_CLIENT_EMAIL: process.env.GOOGLE_CLIENT_EMAIL?.slice(0, 4) + '...',
-            GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY ? '설정됨' : '미설정',
+            GOOGLE_PRIVATE_KEY: '설정됨',
             SHEET_ID: process.env.SHEET_ID?.slice(0, 4) + '...',
-            AUTH_URI: process.env.GOOGLE_AUTH_URI ? '설정됨' : '미설정',
-            TOKEN_URI: process.env.GOOGLE_TOKEN_URI ? '설정됨' : '미설정'
+            AUTH_URI: '설정됨',
+            TOKEN_URI: '설정됨'
         });
 
-        // credentials 객체 체크 로그
-        const credentials = {
+        // 자격 증명 객체 생성
+        const credentials: Credentials = {
             type: 'service_account',
             project_id: process.env.GOOGLE_PROJECT_ID,
             private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
@@ -31,12 +83,13 @@ export async function GET() {
             client_x509_cert_url: process.env.GOOGLE_CLIENT_X509_CERT_URL
         };
 
+        // 자격 증명 체크
         console.log('=== Credentials 체크 ===');
         console.log({
-            hasAllFields: Object.values(credentials).every(val => val !== undefined),
-            fieldsStatus: Object.keys(credentials).reduce((acc, key) => ({
+            hasAllFields: Object.values(credentials).every(Boolean),
+            fieldsStatus: Object.keys(credentials).reduce<CredentialsStatus>((acc, key) => ({
                 ...acc,
-                [key]: credentials[key] ? '설정됨' : '미설정'
+                [key]: credentials[key as keyof Credentials] ? '설정됨' : '미설정'
             }), {})
         });
 
@@ -46,27 +99,17 @@ export async function GET() {
             return NextResponse.json(cachedData);
         }
 
-        // 캐시가 없으면 데이터 가져오기
+        // Google Auth 클라이언트 생성
         const auth = new google.auth.GoogleAuth({
-            credentials: {
-                type: 'service_account',
-                project_id: process.env.GOOGLE_PROJECT_ID,
-                private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
-                private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                client_id: process.env.GOOGLE_CLIENT_ID,
-                auth_uri: process.env.GOOGLE_AUTH_URI,
-                token_uri: process.env.GOOGLE_TOKEN_URI,
-                auth_provider_x509_cert_url: process.env.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
-                client_x509_cert_url: process.env.GOOGLE_CLIENT_X509_CERT_URL
-            },
+            credentials,
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
+        
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.SHEET_ID,
-            range: 'mbti!A1:K1000',
+            range: 'A:Z'
         });
 
         const data = parseSpreadsheetData(response.data.values || []);
@@ -76,35 +119,15 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (error) {
-        console.error('=== API 에러 상세 ===');
-        console.error({
-            error,
-            stack: error instanceof Error ? error.stack : undefined,
-            envVars: {
-                hasProjectId: !!process.env.GOOGLE_PROJECT_ID,
-                hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
-                hasPrivateKey: !!process.env.GOOGLE_PRIVATE_KEY,
-                hasSheetId: !!process.env.SHEET_ID
-            }
-        });
-
+        console.error('Error:', error);
         return NextResponse.json(
-            { 
-                error: '데이터를 가져오는데 실패했습니다', 
-                details: error instanceof Error ? error.message : '알 수 없는 오류',
-                envCheck: {
-                    hasProjectId: !!process.env.GOOGLE_PROJECT_ID,
-                    hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
-                    hasPrivateKey: !!process.env.GOOGLE_PRIVATE_KEY,
-                    hasSheetId: !!process.env.SHEET_ID
-                }
-            },
+            { error: 'Failed to fetch data' },
             { status: 500 }
         );
     }
 }
 
-function parseSpreadsheetData(allRows: string[][]): any {
+function parseSpreadsheetData(allRows: string[][]): SpreadsheetData {
     // 전체 데이터를 가져와서 필요한 부분만 필터링
     let questionsStartIndex = allRows.findIndex(row => row[0] === 'question.id');
     let resultsStartIndex = allRows.findIndex(row => row[0] === '# [RESULTS]');
@@ -181,7 +204,7 @@ function parseSpreadsheetData(allRows: string[][]): any {
             return acc;
         }, {} as Record<string, Array<{ image_url: string; landing_url: string }>>);
 
-    const responseData = {
+    const responseData: SpreadsheetData = {
         meta: {
             title: metaRows.find(row => row[0] === 'meta.title')?.[1] || "MBTI 테스트",
             description: metaRows.find(row => row[0] === 'meta.description')?.[1] || "당신의 MBTI를 알아보세요",

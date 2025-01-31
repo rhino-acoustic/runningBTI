@@ -1,4 +1,7 @@
+'use client';
+
 import { google } from 'googleapis';
+import type { TestData } from '@/types/testTypes';
 
 interface SheetResponse {
     range: string;
@@ -14,10 +17,6 @@ export async function fetchSpreadsheetData() {
         }
         
         const data = await response.json();
-        if (!data) {
-            throw new Error('No data received from spreadsheet');
-        }
-        
         return data;
     } catch (error) {
         console.error('Error fetching spreadsheet data:', error);
@@ -25,11 +24,12 @@ export async function fetchSpreadsheetData() {
     }
 }
 
-export function parseSpreadsheetData(rows: string[][]) {
+export function parseSpreadsheetData(rows: string[][]): TestData {
     const data = {
         meta: {
             title: '',
-            description: ''
+            description: '',
+            main_image: ''
         },
         content: {
             questions: [],
@@ -38,8 +38,13 @@ export function parseSpreadsheetData(rows: string[][]) {
         analytics: {
             participants: 0,
             shares: 0
+        },
+        banners: {
+            start: [],
+            question: [],
+            result: []
         }
-    };
+    } as TestData;
 
     let currentSection = '';
 
@@ -83,15 +88,15 @@ export function parseSpreadsheetData(rows: string[][]) {
                         categories: [
                             {
                                 title: row[3],
-                                items: row[4].split(',').map(item => item.trim())
+                                items: (row[4] || '').split(',').map((item: string) => item.trim()).filter(Boolean)
                             },
                             {
                                 title: row[5],
-                                items: row[6].split(',').map(item => item.trim())
+                                items: (row[6] || '').split(',').map((item: string) => item.trim()).filter(Boolean)
                             },
                             {
                                 title: row[7],
-                                items: row[8].split(',').map(item => item.trim())
+                                items: (row[8] || '').split(',').map((item: string) => item.trim()).filter(Boolean)
                             }
                         ].filter(cat => cat.title && cat.items.length > 0)
                     });
@@ -101,30 +106,4 @@ export function parseSpreadsheetData(rows: string[][]) {
     });
 
     return data;
-}
-
-export interface TestData {
-    meta: {
-        title: string;
-        description: string;
-    };
-    content: {
-        questions: Array<{
-            id: string;
-            text: string;
-            answers: Array<{
-                text: string;
-                type: string;
-            }>;
-        }>;
-        results: Array<{
-            type: string;
-            title: string;
-            description: string;
-            categories: Array<{
-                title: string;
-                items: string[];
-            }>;
-        }>;
-    };
 } 

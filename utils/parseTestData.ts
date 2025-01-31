@@ -198,17 +198,17 @@ export const parseTestData = (csvText: string) => {
                         categories: [
                             {
                                 title: row[3],
-                                items: (row[4] || '').split(',').map(item => item.trim()).filter(Boolean)
+                                items: (row[4] || '').split(',').map((item: string) => item.trim()).filter(Boolean)
                             },
                             {
-                                title: row[5], 
-                                items: (row[6] || '').split(',').map(item => item.trim()).filter(Boolean)
+                                title: row[5],
+                                items: (row[6] || '').split(',').map((item: string) => item.trim()).filter(Boolean)
                             },
                             {
                                 title: row[7],
-                                items: (row[8] || '').split(',').map(item => item.trim()).filter(Boolean)
+                                items: (row[8] || '').split(',').map((item: string) => item.trim()).filter(Boolean)
                             }
-                        ].filter(cat => cat.title && cat.items.length > 0)
+                        ].filter((cat): cat is { title: string; items: string[] } => Boolean(cat.title && cat.items.length > 0))
                     };
                     
                     data.content.results.push(result);

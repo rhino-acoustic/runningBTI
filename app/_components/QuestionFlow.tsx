@@ -128,26 +128,50 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     const [loadState, setLoadState] = useState<LoadState>('idle');
     const [pageState, setPageState] = useState<PageState>('start');
     const [testData, setTestData] = useState<TestData | null>(null);
-    const [currentStep, setCurrentStep] = useState(() =>
-        Number(localStorage.getItem(STORAGE_KEY.CURRENT_STEP) || '0'),
-    );
-    const [answers, setAnswers] = useState<Answer[]>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY.ANSWERS);
-        return saved ? JSON.parse(saved) : [];
-    });
-    const [result, setResult] = useState<string | null>(() =>
-        localStorage.getItem(STORAGE_KEY.RESULT),
-    );
+    const [currentStep, setCurrentStep] = useState(0);
+    const [answers, setAnswers] = useState<Answer[]>([]);
+    const [result, setResult] = useState<string | null>(null);
     const [error, setError] = useState<ErrorState | null>(null);
-    const [stats, setStats] = useState<TestStats>(() => ({
-        participants: Number(localStorage.getItem(STORAGE_KEY.PARTICIPANTS) || '0'),
-    }));
+    const [stats, setStats] = useState<TestStats>({ participants: 0 });  // 기본값으로 초기화
     const [direction, setDirection] = useState<'next' | 'prev'>('next');
     const [isAnimating, setIsAnimating] = useState(false);
     const [userName, setUserName] = useState('');
     const [nameError, setNameError] = useState('');
     const [mbtiResult, setMBTIResult] = useState<MBTIResult | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
+
+    // localStorage 초기화를 useEffect로 이동
+    useEffect(() => {
+        // localStorage에서 저장된 값 불러오기
+        const savedStep = localStorage.getItem(STORAGE_KEY.CURRENT_STEP);
+        const savedAnswers = localStorage.getItem(STORAGE_KEY.ANSWERS);
+        const savedResult = localStorage.getItem(STORAGE_KEY.RESULT);
+        const savedParticipants = localStorage.getItem(STORAGE_KEY.PARTICIPANTS);
+
+        if (savedStep) setCurrentStep(Number(savedStep));
+        if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
+        if (savedResult) setResult(savedResult);
+        if (savedParticipants) setStats({ participants: Number(savedParticipants) });
+    }, []);
+
+    // localStorage 업데이트를 useEffect로 이동
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY.CURRENT_STEP, String(currentStep));
+    }, [currentStep]);
+
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY.ANSWERS, JSON.stringify(answers));
+    }, [answers]);
+
+    useEffect(() => {
+        if (result) {
+            localStorage.setItem(STORAGE_KEY.RESULT, result);
+        }
+    }, [result]);
+
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
+    }, [stats.participants]);
 
     // 결과 계산 함수
     const calculateResult = () => {
@@ -253,7 +277,6 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
             ...prev,
             participants: newParticipants,
         }));
-        localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(newParticipants));
     };
 
     // 테스트 시작
@@ -295,12 +318,10 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         
         const updatedAnswers = [...answers, newAnswer];
         setAnswers(updatedAnswers);
-        localStorage.setItem(STORAGE_KEY.ANSWERS, JSON.stringify(updatedAnswers));
 
         // 다음 단계로 이동
         if (currentStep < testData.content.questions.length - 1) {
             setCurrentStep(prev => prev + 1);
-            localStorage.setItem(STORAGE_KEY.CURRENT_STEP, String(currentStep + 1));
         } else {
             calculateResult();
         }
@@ -314,17 +335,13 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         }
     };
 
-    // 테스트 다시하기 핸들러 추가
+    // 테스트 다시하기 핸들러 수정
     const handleRestart = () => {
         setPageState('start');
         setCurrentStep(0);
         setAnswers([]);
         setResult(null);
-        // localStorage 초기화
-        localStorage.removeItem(STORAGE_KEY.CURRENT_STEP);
-        localStorage.removeItem(STORAGE_KEY.ANSWERS);
-        localStorage.removeItem(STORAGE_KEY.PAGE_STATE);
-        localStorage.removeItem(STORAGE_KEY.RESULT);
+        // localStorage 초기화는 useEffect에서 자동으로 처리됨
     };
 
     // 공유 핸들러 추가
