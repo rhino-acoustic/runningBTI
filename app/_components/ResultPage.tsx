@@ -46,10 +46,22 @@ export function ResultPage({
             const canvas = await html2canvas(element, {
                 backgroundColor: '#ffffff',
                 scale: 2,
+                useCORS: true,  // CORS 이미지 허용
+                allowTaint: true,  // 외부 이미지 허용
+                logging: false,
+                imageTimeout: 0,  // 이미지 로딩 타임아웃 제거
+                onclone: (clonedDoc) => {
+                    // 클론된 요소에서 이미지 스타일 조정
+                    const images = clonedDoc.getElementsByTagName('img');
+                    for (let img of images) {
+                        img.style.maxWidth = '100%';
+                        img.style.height = 'auto';
+                    }
+                }
             });
 
             // Canvas를 이미지로 변환
-            const image = canvas.toDataURL('image/png');
+            const image = canvas.toDataURL('image/png', 1.0);  // 품질 1.0으로 설정
             
             // 다운로드 링크 생성 및 클릭
             const link = document.createElement('a');
@@ -102,7 +114,7 @@ export function ResultPage({
         <div className="w-full overflow-x-hidden animate-fade-in">
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
                 {/* 캡처될 영역 */}
-                <div id="capture-area" className="bg-white w-full max-w-[448px] mx-auto relative">
+                <div id="capture-area" className="bg-white w-full max-w-[448px] mx-auto relative pb-4">
                     {/* 워터마크 로고 패턴 */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
                         <div className="absolute inset-[-50%] w-[200%] h-[200%]">
@@ -185,7 +197,7 @@ export function ResultPage({
                         </div>
 
                         {/* 하단 배너 */}
-                        <div className="h-[100px] bg-white mb-2 max-w-md mx-auto">
+                        <div className="w-full h-[100px] bg-white mb-4">
                             {bottomImage && (
                                 <a
                                     href={bottomImage.landing_url}
@@ -193,20 +205,22 @@ export function ResultPage({
                                     rel="noopener noreferrer"
                                     className="block h-full"
                                 >
-                                    <Image
-                                        src={bottomImage.image_url}
-                                        alt="Advertisement"
-                                        width={448}
-                                        height={100}
-                                        className="w-full h-full object-contain"  // cover 대신 contain 사용
-                                        priority
-                                    />
+                                    <div className="relative w-full h-full">
+                                        <Image
+                                            src={bottomImage.image_url}
+                                            alt="Advertisement"
+                                            fill
+                                            className="object-contain"
+                                            sizes="(max-width: 448px) 100vw, 448px"
+                                            priority
+                                        />
+                                    </div>
                                 </a>
                             )}
                         </div>
 
-                        {/* 로고 추가 */}
-                        <div className="flex justify-center items-center mb-4">
+                        {/* 로고 */}
+                        <div className="flex justify-center">
                             <a
                                 href="https://vegavery.com"
                                 target="_blank"
