@@ -578,11 +578,16 @@ export default function QuestionFlow({ testTitle, questions, results, banners }:
                         </div>
                     </div>
 
-                    {/* 하단 배너 */}
+                    {/* 시작 페이지 배너 */}
                     {testData?.banners?.start?.[0] && (
                         <div className="w-full max-w-md mx-auto">
                             <div className="w-full h-[100px] bg-white mb-4">
-                                <div className="relative w-full h-full flex items-center justify-center">
+                                <a
+                                    href={testData.banners.start[0].landing_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block h-full w-full"
+                                >
                                     <div className="relative w-full h-full">
                                         <Image
                                             src={testData.banners.start[0].image_url}
@@ -593,7 +598,7 @@ export default function QuestionFlow({ testTitle, questions, results, banners }:
                                             priority
                                         />
                                     </div>
-                                </div>
+                                </a>
                             </div>
                         </div>
                     )}
@@ -716,7 +721,12 @@ export default function QuestionFlow({ testTitle, questions, results, banners }:
                     {currentBanner && (
                         <div className="w-full max-w-md mx-auto">
                             <div className="w-full h-[100px] bg-white mb-4">
-                                <div className="relative w-full h-full flex items-center justify-center">
+                                <a
+                                    href={currentBanner.landing_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block h-full w-full"
+                                >
                                     <div className="relative w-full h-full">
                                         <Image
                                             src={currentBanner.image_url}
@@ -727,7 +737,7 @@ export default function QuestionFlow({ testTitle, questions, results, banners }:
                                             priority
                                         />
                                     </div>
-                                </div>
+                                </a>
                             </div>
                         </div>
                     )}

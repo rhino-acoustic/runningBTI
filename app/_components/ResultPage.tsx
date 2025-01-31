@@ -220,14 +220,21 @@ export function ResultPage({
                         {bottomImage && (
                             <div className="w-full h-[100px] bg-white">
                                 <div className="relative w-full h-full">
-                                    <Image
-                                        src={bottomImage.image_url}
-                                        alt="Advertisement"
-                                        fill
-                                        className="object-contain"
-                                        unoptimized
-                                        priority
-                                    />
+                                    <a
+                                        href={bottomImage.landing_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block h-full w-full"
+                                    >
+                                        <Image
+                                            src={bottomImage.image_url}
+                                            alt="Advertisement"
+                                            fill
+                                            className="object-contain"
+                                            unoptimized
+                                            priority
+                                        />
+                                    </a>
                                 </div>
                             </div>
                         )}
