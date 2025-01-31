@@ -41,11 +41,10 @@ export function ResultPage({
 }: ResultProps) {
     // 결과 이미지 저장
     const handleSave = async () => {
-        const element = document.getElementById('capture-area');
+        const element = document.querySelector('.result-capture-area');
         if (!element) return;
 
         try {
-            // 성공시 효과 먼저 실행
             confetti({
                 particleCount: 100,
                 spread: 70,
@@ -62,6 +61,36 @@ export function ResultPage({
                     Array.from(images).forEach(img => {
                         if (img.src.startsWith('/')) {
                             img.src = window.location.origin + img.src;
+                        }
+                        
+                        if (img.alt === "Advertisement") {
+                            const container = img.parentElement?.parentElement;
+                            if (container) {
+                                container.style.width = '100%';
+                                container.style.height = '100px';
+                                container.style.display = 'flex';
+                                container.style.alignItems = 'center';
+                                container.style.justifyContent = 'center';
+                                container.style.padding = '0';
+                                container.style.margin = '0';
+                                container.style.marginBottom = '1rem';
+                                container.style.backgroundColor = 'white';
+                            }
+                            img.style.width = '448px';
+                            img.style.height = '100px';
+                            img.style.objectFit = 'contain';
+                        } else if (img.alt === "Vegavery Logo") {
+                            const container = img.parentElement;
+                            if (container) {
+                                container.style.width = '100px';
+                                container.style.height = '30px';
+                                container.style.display = 'flex';
+                                container.style.alignItems = 'center';
+                                container.style.justifyContent = 'center';
+                            }
+                            img.style.maxWidth = '100px';
+                            img.style.height = 'auto';
+                            img.style.objectFit = 'contain';
                         }
                     });
                 }
@@ -149,83 +178,8 @@ export function ResultPage({
         <div className="w-full overflow-x-hidden">
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
                 {/* 화면에 보이는 영역 */}
-                <div className="w-full bg-white max-w-[448px] mx-auto p-4">
+                <div className="w-full bg-white max-w-[448px] mx-auto p-4 result-capture-area">
                     <div className="w-full">
-                        {/* 제목 */}
-                        <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
-                            {testTitle}
-                        </h1>
-
-                        {/* 결과 내용 */}
-                        <div className="text-center mb-6">
-                            <h2 className="type-title font-bold text-2xl mb-1">
-                                {userName ? (
-                                    <span className="inline">
-                                        <span className="text-[#004D40]">{userName}</span>
-                                        <span className="mx-1">님은</span>
-                                    </span>
-                                ) : null}
-                                <span>{result.type} {result.title}</span>
-                            </h2>
-                            <p className="description text-lg mb-0">
-                                {result.description}
-                            </p>
-                        </div>
-                        
-                        {/* 특성 목록 */}
-                        <div className="characteristics mb-4">
-                            <div className="characteristic-group">
-                                <div className="space-y-1">
-                                    {result.categories.map((category, index) => (
-                                        <ResultSection
-                                            key={index}
-                                            title={category.title}
-                                            items={category.items}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 하단 배너 */}
-                        {bottomImage && (
-                            <div className="w-full h-[100px] bg-white">
-                                <div className="relative w-full h-full">
-                                    <Image
-                                        src={bottomImage.image_url}
-                                        alt="Advertisement"
-                                        fill
-                                        className="object-contain"
-                                        unoptimized
-                                        priority
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 로고 */}
-                        <div className="flex justify-center">
-                            <div className="relative w-[100px] h-[30px]">
-                                <Image
-                                    src="/logo/bk.png"
-                                    alt="Vegavery Logo"
-                                    fill
-                                    className="object-contain"
-                                    unoptimized
-                                    priority
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 캡처를 위한 숨겨진 영역 */}
-                <div 
-                    id="capture-area" 
-                    className="absolute left-[-9999px]"
-                    style={{ width: '448px' }}
-                >
-                    <div className="bg-white p-4">
                         {/* 제목 */}
                         <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
                             {testTitle}
