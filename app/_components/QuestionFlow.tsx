@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ProgressGauge } from './ProgressGauge';
 import { ResultPage } from './ResultPage';
 import { Spinner } from '../../components/Spinner';
@@ -140,6 +140,7 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     const [mbtiResult, setMBTIResult] = useState<MBTIResult | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+    const [imageCache, setImageCache] = useState<Set<string>>(new Set());
 
     // localStorage 초기화를 useEffect로 이동
     useEffect(() => {
@@ -174,26 +175,36 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         localStorage.setItem(STORAGE_KEY.PARTICIPANTS, String(stats.participants));
     }, [stats.participants]);
 
-    // 이미지 프리로딩을 위한 함수의 타입 수정
-    const preloadImages = (questions: Array<{ 
+    // 이미지 프리로딩 함수 개선
+    const preloadImages = useCallback((questions: Array<{ 
         id: string; 
         text: string; 
         image_url?: string | null;
         answers: Array<{ text: string; type: string; }>;
-    }>, currentIndex: number = 0) => {
+    }>, currentIndex: number) => {
         if (typeof window === 'undefined') return;
 
-        // 현재 질문과 다음 질문의 이미지를 프리로드
+        // 현재, 이전, 다음 이미지 URL 수집
         const imagesToPreload = [
-            questions[currentIndex]?.image_url,
-            questions[currentIndex + 1]?.image_url
-        ].filter((url): url is string => !!url);
+            questions[currentIndex - 1]?.image_url,  // 이전 이미지
+            questions[currentIndex]?.image_url,      // 현재 이미지
+            questions[currentIndex + 1]?.image_url   // 다음 이미지
+        ].filter((url): url is string => !!url && !imageCache.has(url));
 
+        // 새로운 이미지만 프리로드
         imagesToPreload.forEach(url => {
             const img = new window.Image();
             img.src = url;
+            setImageCache(prev => new Set([...prev, url]));
         });
-    };
+    }, [imageCache]);
+
+    // 이미지 프리로딩 효과 수정
+    useEffect(() => {
+        if (testData?.content?.questions) {
+            preloadImages(testData.content.questions, currentStep);
+        }
+    }, [currentStep, testData, preloadImages]);
 
     // 데이터 로드
     useEffect(() => {
@@ -219,11 +230,6 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                     throw new Error('Invalid data structure');
                 }
 
-                // 첫 번째 이미지 프리로드
-                if (testData.content.questions) {
-                    preloadImages(testData.content.questions, 0);
-                }
-
                 setTestData(testData);
                 setStats({ participants: statsData.participants });
                 setLoadState('ready');
@@ -240,13 +246,6 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
         loadData();
     }, []);
-
-    // 질문이 바뀔 때마다 다음 이미지 프리로드
-    useEffect(() => {
-        if (testData?.content?.questions) {
-            preloadImages(testData.content.questions, currentStep);
-        }
-    }, [currentStep, testData]);
 
     // 결과 계산 함수
     const calculateResult = () => {
@@ -436,6 +435,27 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         return <span>현재 {count}명이 참여했어요</span>;
     };
 
+    // 이미지 컴포넌트 수정
+    const QuestionImage = ({ url, step }: { url: string; step: number }) => {
+        return (
+            <div className="w-full max-w-md mb-4">
+                <div className="h-[170px] mx-auto flex justify-center relative">
+                    <div className="relative w-[302px] h-full">
+                        <Image
+                            src={url}
+                            alt={`Question ${step + 1} image`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 302px"
+                            className="object-contain"
+                            priority
+                            loading="eager"  // 즉시 로딩
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     // 로딩 화면
     if (loadState === 'loading') {
         return (
@@ -607,14 +627,39 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
         return (
             <div className="w-full overflow-x-hidden">
                 <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                    {/* 게이지바 컨테이너에 패딩 추가 */}
-                    <div className="px-4 w-full max-w-md mx-auto">
-                        <ProgressGauge 
-                            current={currentStep + 1} 
-                            total={testData.content.questions.length} 
-                        />
+                    {/* 게이지바 영역 */}
+                    <div className="sticky top-0 bg-[#F1E9DB] pt-4 pb-2">
+                        <div className="relative px-4 w-full max-w-md mx-auto">
+                            <ProgressGauge 
+                                current={currentStep + 1} 
+                                total={testData.content.questions.length} 
+                            />
+                            {/* 이전 버튼을 게이지 좌측 하단에 플로팅 */}
+                            {currentStep > 0 && (
+                                <button
+                                    onClick={handlePrevQuestion}
+                                    className="absolute -bottom-8 left-4 flex items-center justify-center w-8 h-8 rounded-full bg-white text-[#8D6E63] hover:text-[#004D40] transition-colors shadow-md"
+                                    aria-label="이전 질문"
+                                >
+                                    <svg 
+                                        className="w-5 h-5" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M15 19l-7-7 7-7"
+                                        />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
                     </div>
 
+                    {/* 나머지 컨텐츠는 그대로 유지 */}
                     <div className="flex-1 flex flex-col items-center p-4">
                         {/* 질문 영역 */}
                         <div className="w-full max-w-md">
@@ -630,20 +675,10 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
 
                             {/* 질문 이미지 */}
                             {question.image_url && (
-                                <div className="w-full max-w-md mb-4">
-                                    <div className="h-[170px] mx-auto flex justify-center relative">
-                                        <div className="relative w-[302px] h-full">
-                                            <Image
-                                                src={question.image_url}
-                                                alt={`Question ${currentStep + 1} image`}
-                                                fill
-                                                sizes="(max-width: 768px) 100vw, 302px"
-                                                className="object-contain"
-                                                priority
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                <QuestionImage 
+                                    url={question.image_url} 
+                                    step={currentStep} 
+                                />
                             )}
 
                             {/* 답변 버튼들 */}

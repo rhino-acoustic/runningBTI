@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import { CountUpNumber } from './CountUpNumber';
 import Image from 'next/image';
 import { SaveIcon, ShareIcon, RestartIcon } from '../../components/Icons';
+import { ResultCard } from './ResultCard';
 
 // 이미지 관련 인터페이스 제거
 interface ResultProps {
@@ -29,6 +30,39 @@ interface ResultProps {
     userName?: string;
 }
 
+// 이미지 캡처용 컴포넌트
+const CaptureImage = ({ src, alt, style }: { src: string; alt: string; style: React.CSSProperties }) => {
+    return (
+        <img
+            src={src}
+            alt={alt}
+            style={style}
+            crossOrigin="anonymous"
+        />
+    );
+};
+
+// 일반 표시용 컴포넌트
+const DisplayImage = ({ src, alt, width, height, className }: { 
+    src: string; 
+    alt: string; 
+    width: number;
+    height: number;
+    className?: string;
+}) => {
+    return (
+        <Image
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            className={className}
+            priority
+            unoptimized
+        />
+    );
+};
+
 export function ResultPage({
     testTitle,
     result,
@@ -41,34 +75,29 @@ export function ResultPage({
     const handleSave = async () => {
         try {
             const element = document.getElementById('capture-area');
-            if (!element) return;
+            if (!element) {
+                throw new Error('Element not found');
+            }
 
             const canvas = await html2canvas(element, {
-                backgroundColor: '#ffffff',
+                backgroundColor: '#FFFFFF',
                 scale: 2,
                 useCORS: true,
                 allowTaint: true,
-                logging: false,
+                proxy: undefined,
                 imageTimeout: 0,
                 onclone: (clonedDoc) => {
-                    const images = Array.from(clonedDoc.getElementsByTagName('img'));
-                    images.forEach(img => {
-                        if (img.closest('.relative')) {  // relative 컨테이너 내부의 이미지만 처리
-                            img.style.width = '100%';
-                            img.style.height = '100%';
-                            img.style.objectFit = 'contain';
-                            img.style.position = 'absolute';
-                            img.style.inset = '0';
-                        }
+                    const images = clonedDoc.getElementsByTagName('img');
+                    Array.from(images).forEach(img => {
+                        img.setAttribute('crossorigin', 'anonymous');
                     });
                 }
             });
 
-            const image = canvas.toDataURL('image/png', 1.0);
-            
+            const pngUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.href = image;
             link.download = `${result.type}_result.png`;
+            link.href = pngUrl;
             link.click();
         } catch (error) {
             console.error('이미지 저장 실패:', error);
@@ -112,126 +141,93 @@ export function ResultPage({
         );
     };
 
-    return (
-        <div className="w-full overflow-x-hidden animate-fade-in">
-            <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                {/* 캡처될 영역 */}
-                <div id="capture-area" className="bg-white w-full max-w-[448px] mx-auto relative">
-                    {/* 워터마크 로고 패턴 */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-                        <div className="absolute inset-[-50%] w-[200%] h-[200%]">
-                            <div 
-                                className="w-full h-full" 
-                                style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(12, 1fr)',
-                                    gap: '50px 40px',
-                                    transform: 'rotate(-20deg)',
-                                    padding: '20px',
-                                    position: 'relative',
-                                    left: '-20%',
-                                    top: '-10%'
-                                }}
-                            >
-                                {[...Array(60)].map((_, i) => (
-                                    <div 
-                                        key={i} 
-                                        className="flex items-center justify-center"
-                                        style={{
-                                            transform: `translateX(${i % 2 * 20}px)`
-                                        }}
-                                    >
-                                        <div className="relative w-[60px] h-[18px]">
-                                            <Image
-                                                src="/logo/bk.png"
-                                                alt=""
-                                                fill
-                                                className="opacity-[0.035]"
-                                                style={{
-                                                    objectFit: 'contain',
-                                                    filter: 'grayscale(100%)'
-                                                }}
-                                                priority
-                                                unoptimized
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+    // 배너 이미지 컴포넌트 수정
+    const BannerImage = ({ image }: { image: { image_url: string; landing_url: string } }) => {
+        return (
+            <div className="relative w-full h-[100px]">
+                <Image
+                    src={image.image_url}
+                    alt="Advertisement"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 448px) 100vw, 448px"
+                    priority
+                    unoptimized
+                />
+            </div>
+        );
+    };
 
-                    {/* 기존 컨텐츠 */}
-                    <div className="flex flex-col items-center px-4 pt-4 relative z-10">
-                        <h1 className="test-title text-2xl font-bold mb-6 text-center">
+    return (
+        <div className="w-full overflow-x-hidden">
+            <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
+                {/* 캡처 영역 - flex-1 제거하고 pb-16 추가 */}
+                <div 
+                    id="capture-area" 
+                    className="w-full bg-white max-w-[448px] mx-auto p-4"
+                >
+                    <div className="w-full">
+                        {/* 제목 */}
+                        <h1 className="text-2xl font-bold text-center text-[#004D40] mb-6">
                             {testTitle}
                         </h1>
 
-                        <div className="result-container">
-                            <div className="text-center mb-6">
-                                <h2 className="type-title font-bold text-2xl mb-1">
-                                    {userName ? (
-                                        <span className="inline">
-                                            <span className="text-[#004D40]">{userName}</span>
-                                            <span className="mx-1">님은</span>
-                                        </span>
-                                    ) : null}
-                                    <span>{result.type} {result.title}</span>
-                                </h2>
-                                <p className="description text-lg mb-0">
-                                    {result.description}
-                                </p>
-                            </div>
-                            
-                            <div className="characteristics mb-4">
-                                <div className="characteristic-group">
-                                    <div className="space-y-1">
-                                        {result.categories.map((category, index) => (
-                                            <ResultSection
-                                                key={index}
-                                                title={category.title}
-                                                items={category.items}
-                                            />
-                                        ))}
-                                    </div>
+                        {/* 결과 내용 */}
+                        <div className="text-center mb-6">
+                            <h2 className="type-title font-bold text-2xl mb-1">
+                                {userName ? (
+                                    <span className="inline">
+                                        <span className="text-[#004D40]">{userName}</span>
+                                        <span className="mx-1">님은</span>
+                                    </span>
+                                ) : null}
+                                <span>{result.type} {result.title}</span>
+                            </h2>
+                            <p className="description text-lg mb-0">
+                                {result.description}
+                            </p>
+                        </div>
+                        
+                        {/* 특성 목록 */}
+                        <div className="characteristics mb-4">
+                            <div className="characteristic-group">
+                                <div className="space-y-1">
+                                    {result.categories.map((category, index) => (
+                                        <ResultSection
+                                            key={index}
+                                            title={category.title}
+                                            items={category.items}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         </div>
 
                         {/* 하단 배너 */}
-                        <div className="w-full h-[100px] bg-white mb-4">
-                            {bottomImage && (
-                                <div className="relative w-full h-full">
-                                    <Image
-                                        src={bottomImage.image_url}
-                                        alt="Advertisement"
-                                        fill
-                                        className="object-contain"
-                                        sizes="(max-width: 448px) 100vw, 448px"
-                                        priority
-                                        unoptimized  // 이미지 최적화 비활성화
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 로고 */}
-                        <div className="flex justify-center mb-4">
-                            <div className="relative w-[100px] h-[30px]">
-                                <Image
-                                    src="/logo/bk.png"
-                                    alt="Vegavery Logo"
-                                    fill
-                                    className="object-contain"
-                                    sizes="100px"
-                                    unoptimized  // 이미지 최적화 비활성화
+                        {bottomImage && (
+                            <div className="w-full h-[100px] bg-white">
+                                <img
+                                    src={bottomImage.image_url}
+                                    alt="Advertisement"
+                                    className="w-full h-full object-contain"
+                                    crossOrigin="anonymous"
                                 />
                             </div>
+                        )}
+
+                        {/* 로고 */}
+                        <div className="flex justify-center">
+                            <img
+                                src="/logo/bk.png"
+                                alt="Vegavery Logo"
+                                className="w-[100px] h-auto"
+                                crossOrigin="anonymous"
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* 버튼 영역 수정 */}
+                {/* 버튼 영역 */}
                 <div className="fixed bottom-0 left-0 right-0">
                     <div className="w-full max-w-[448px] mx-auto bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
                         <div className="px-4 py-3">
