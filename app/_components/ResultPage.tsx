@@ -46,24 +46,22 @@ export function ResultPage({
             const canvas = await html2canvas(element, {
                 backgroundColor: '#ffffff',
                 scale: 2,
-                useCORS: true,  // CORS 이미지 허용
-                allowTaint: true,  // 외부 이미지 허용
+                useCORS: true,
+                allowTaint: true,
                 logging: false,
-                imageTimeout: 0,  // 이미지 로딩 타임아웃 제거
+                imageTimeout: 0,
                 onclone: (clonedDoc) => {
-                    // 클론된 요소에서 이미지 스타일 조정
-                    const images = clonedDoc.getElementsByTagName('img');
-                    for (let img of images) {
+                    // HTMLCollection을 배열로 변환
+                    const images = Array.from(clonedDoc.getElementsByTagName('img'));
+                    images.forEach(img => {
                         img.style.maxWidth = '100%';
                         img.style.height = 'auto';
-                    }
+                    });
                 }
             });
 
-            // Canvas를 이미지로 변환
-            const image = canvas.toDataURL('image/png', 1.0);  // 품질 1.0으로 설정
+            const image = canvas.toDataURL('image/png', 1.0);
             
-            // 다운로드 링크 생성 및 클릭
             const link = document.createElement('a');
             link.href = image;
             link.download = `${result.type}_result.png`;
