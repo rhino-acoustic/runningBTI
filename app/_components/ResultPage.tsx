@@ -218,22 +218,24 @@ export function ResultPage({
 
                         {/* 하단 배너 */}
                         {bottomImage && (
-                            <div className="w-full h-[100px] bg-white">
-                                <div className="relative w-full h-full">
+                            <div className="w-full bg-white">
+                                <div className="aspect-[448/100] w-full">
                                     <a
                                         href={bottomImage.landing_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="block h-full w-full"
                                     >
-                                        <Image
-                                            src={bottomImage.image_url}
-                                            alt="Advertisement"
-                                            fill
-                                            className="object-contain"
-                                            unoptimized
-                                            priority
-                                        />
+                                        <div className="relative w-full h-full">
+                                            <Image
+                                                src={bottomImage.image_url}
+                                                alt="Advertisement"
+                                                fill
+                                                className="object-cover"
+                                                unoptimized
+                                                priority
+                                            />
+                                        </div>
                                     </a>
                                 </div>
                             </div>

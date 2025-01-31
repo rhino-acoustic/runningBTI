@@ -581,24 +581,26 @@ export default function QuestionFlow({ testTitle, questions, results, banners }:
                     {/* 시작 페이지 배너 */}
                     {testData?.banners?.start?.[0] && (
                         <div className="w-full max-w-md mx-auto">
-                            <div className="w-full h-[100px] bg-white mb-4">
-                                <a
-                                    href={testData.banners.start[0].landing_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block h-full w-full"
-                                >
-                                    <div className="relative w-full h-full">
-                                        <Image
-                                            src={testData.banners.start[0].image_url}
-                                            alt="Advertisement"
-                                            fill
-                                            className="object-contain"
-                                            unoptimized
-                                            priority
-                                        />
-                                    </div>
-                                </a>
+                            <div className="w-full bg-white mb-4">
+                                <div className="aspect-[448/100] w-full">
+                                    <a
+                                        href={testData.banners.start[0].landing_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block h-full w-full"
+                                    >
+                                        <div className="relative w-full h-full">
+                                            <Image
+                                                src={testData.banners.start[0].image_url}
+                                                alt="Advertisement"
+                                                fill
+                                                className="object-cover"
+                                                unoptimized
+                                                priority
+                                            />
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -720,24 +722,26 @@ export default function QuestionFlow({ testTitle, questions, results, banners }:
                     {/* 질문 페이지 배너 */}
                     {currentBanner && (
                         <div className="w-full max-w-md mx-auto">
-                            <div className="w-full h-[100px] bg-white mb-4">
-                                <a
-                                    href={currentBanner.landing_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block h-full w-full"
-                                >
-                                    <div className="relative w-full h-full">
-                                        <Image
-                                            src={currentBanner.image_url}
-                                            alt="Advertisement"
-                                            fill
-                                            className="object-contain"
-                                            unoptimized
-                                            priority
-                                        />
-                                    </div>
-                                </a>
+                            <div className="w-full bg-white mb-4">
+                                <div className="aspect-[448/100] w-full">
+                                    <a
+                                        href={currentBanner.landing_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block h-full w-full"
+                                    >
+                                        <div className="relative w-full h-full">
+                                            <Image
+                                                src={currentBanner.image_url}
+                                                alt="Advertisement"
+                                                fill
+                                                className="object-cover"
+                                                unoptimized
+                                                priority
+                                            />
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     )}
