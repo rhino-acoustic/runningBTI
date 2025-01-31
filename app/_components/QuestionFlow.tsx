@@ -405,9 +405,11 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
     // 로딩 화면
     if (loadState === 'loading') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
-                <Spinner />
-                <p className="mt-4 text-[#8D6E63]">로딩 중...</p>
+            <div className="flex flex-col items-center justify-center min-h-[500px] max-h-screen bg-gradient-to-b from-[#F1E9DB] to-[#E5D9C3]">
+                <div className="flex flex-col items-center gap-4 p-4">
+                    <Spinner />
+                    <p className="text-[#8D6E63]">로딩 중...</p>
+                </div>
             </div>
         );
     }
