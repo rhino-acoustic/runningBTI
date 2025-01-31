@@ -154,6 +154,19 @@ export default async function Home() {
                 </div>
             </div>
           )}
+          {/* 로고 */}
+          <div className="flex justify-center">
+            <div className="relative w-[100px] h-[30px]">
+                <Image
+                    src="/logo/bk.png"
+                    alt="Vegavery Logo"
+                    fill
+                    className="object-contain"
+                    unoptimized
+                    priority
+                />
+            </div>
+          </div>
         </main>
       </ErrorBoundary>
     );

@@ -725,25 +725,17 @@ export default function QuestionFlow({ testTitle, questions, results }: Question
                     )}
 
                     {/* 로고 */}
-                    <div className="flex justify-center mb-4">
-                        <a
-                            href="https://vegavery.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
-                        >
+                    <div className="flex justify-center">
+                        <div className="relative w-[100px] h-[30px]">
                             <Image
                                 src="/logo/bk.png"
                                 alt="Vegavery Logo"
-                                width={100}
-                                height={30}
-                                style={{
-                                    width: '100px',
-                                    height: 'auto',
-                                    objectFit: 'contain'
-                                }}
+                                fill
+                                className="object-contain"
+                                unoptimized
+                                priority
                             />
-                        </a>
+                        </div>
                     </div>
                 </div>
             </div>
